@@ -9,9 +9,11 @@ interface RecipeListProps {
   hasSearched: boolean;
   savedRecipes: Recipe[];
   onToggleSave: (recipe: Recipe) => void;
+  likedRecipes: string[];
+  onToggleLike: (recipe: Recipe) => void;
 }
 
-export function RecipeList({ recipes, onRecipeClick, isLoading, hasSearched, savedRecipes, onToggleSave }: RecipeListProps) {
+export function RecipeList({ recipes, onRecipeClick, isLoading, hasSearched, savedRecipes, onToggleSave, likedRecipes, onToggleLike }: RecipeListProps) {
   if (isLoading) {
     return (
       <div className="recipes-loading">
@@ -45,12 +47,14 @@ export function RecipeList({ recipes, onRecipeClick, isLoading, hasSearched, sav
     <div className="recipe-grid">
       {recipes.map((recipe, index) => (
         <RecipeCard 
-          key={recipe.idMeal} 
+          key={recipe.id} 
           recipe={recipe} 
           onClick={onRecipeClick}
           index={index}
-          isSaved={savedRecipes.some(r => r.idMeal === recipe.idMeal)}
+          isSaved={savedRecipes.some(r => r.id === recipe.id)}
           onToggleSave={onToggleSave}
+          isLiked={likedRecipes.includes(recipe.id)}
+          onToggleLike={onToggleLike}
         />
       ))}
     </div>

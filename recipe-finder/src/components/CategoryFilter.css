@@ -1,16 +1,9 @@
-.intent-filter-container {
+.category-filter-container {
   margin-bottom: 2rem;
   width: 100%;
 }
 
-.intent-heading {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--text-primary);
-}
-
-.intent-list {
+.category-list {
   display: flex;
   overflow-x: auto;
   gap: 0.5rem;
@@ -18,33 +11,29 @@
   scrollbar-width: none;
 }
 
-.intent-list::-webkit-scrollbar {
+.category-list::-webkit-scrollbar {
   display: none;
 }
 
-.intent-chip {
-  padding: 0.5rem 1rem;
+.category-chip {
+  padding: 0.5rem 1.25rem;
   white-space: nowrap;
-  border-radius: 8px;
+  border-radius: 100px;
   color: var(--text-secondary);
   background: white;
   border: 1px solid var(--border-color);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 500;
+  transition: all 0.2s ease;
 }
 
-.intent-chip:hover:not(:disabled) {
+.category-chip:hover {
   border-color: var(--accent-color);
   color: var(--text-primary);
 }
 
-.intent-chip.active {
+.category-chip.active {
   background: var(--text-primary);
   color: white;
   border-color: var(--text-primary);
-}
-
-.intent-chip:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
