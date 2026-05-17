@@ -9,3 +9,14 @@ export interface Recipe {
   strYoutube: string;
   [key: string]: string | null; // For dynamic ingredients and measures
 }
+
+export interface AiRecipe {
+  id: string;
+  name: string;
+  description: string;
+  ingredientsUsed: string[];
+  missingIngredients: string[];
+  time: string;
+  difficulty: string;
+  steps: string[];
+}

@@ -1,9 +1,16 @@
-.region-filter-container {
+.intent-filter-container {
   margin-bottom: 2rem;
   width: 100%;
 }
 
-.region-list {
+.intent-heading {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.intent-list {
   display: flex;
   overflow-x: auto;
   gap: 0.5rem;
@@ -11,11 +18,11 @@
   scrollbar-width: none;
 }
 
-.region-list::-webkit-scrollbar {
+.intent-list::-webkit-scrollbar {
   display: none;
 }
 
-.region-chip {
+.intent-chip {
   padding: 0.5rem 1rem;
   white-space: nowrap;
   border-radius: 8px;
@@ -26,18 +33,18 @@
   font-weight: 500;
 }
 
-.region-chip:hover:not(:disabled) {
+.intent-chip:hover:not(:disabled) {
   border-color: var(--accent-color);
   color: var(--text-primary);
 }
 
-.region-chip.active {
+.intent-chip.active {
   background: var(--text-primary);
   color: white;
   border-color: var(--text-primary);
 }
 
-.region-chip:disabled {
+.intent-chip:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

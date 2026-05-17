@@ -21,7 +21,7 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
         <input 
           type="text" 
           name="search"
-          placeholder="Search for a recipe (e.g., Chicken, Pasta, Curry)..." 
+          placeholder="Cari resep, misal: ayam geprek, nasi goreng, sop, mie..." 
           className="search-input"
           autoComplete="off"
         />
