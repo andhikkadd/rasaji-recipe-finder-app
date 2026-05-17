@@ -4,7 +4,7 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   {
     id: "r1",
     title: "Nasi Goreng Kampung",
-    image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+
     category: "Nasi",
     shortDescription: "Nasi goreng simpel ala rumahan dengan bumbu ulek yang harum dan pedas manis.",
     cookingTime: "15 Menit",
@@ -35,7 +35,7 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   {
     id: "r2",
     title: "Ayam Geprek Spesial",
-    image: "https://images.unsplash.com/photo-1626804475297-41609ea004eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+
     category: "Ayam",
     shortDescription: "Ayam goreng tepung renyah yang digeprek hancur dengan sambal bawang super pedas.",
     cookingTime: "30 Menit",
@@ -64,7 +64,7 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   {
     id: "r3",
     title: "Sayur Asem Segar",
-    image: "https://images.unsplash.com/photo-1548943487-a2e4e43b4850?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+
     category: "Sayur",
     shortDescription: "Sayur kuah asam segar dengan isian melinjo, jagung manis, dan kacang panjang.",
     cookingTime: "40 Menit",
@@ -95,7 +95,7 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   {
     id: "r4",
     title: "Telur Dadar Padang",
-    image: "https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+
     category: "Telur",
     shortDescription: "Telur dadar tebal, gurih, dan mengembang sempurna ala restoran Padang.",
     cookingTime: "15 Menit",
@@ -125,7 +125,7 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   {
     id: "r5",
     title: "Orek Tempe Manis Pedas",
-    image: "https://images.unsplash.com/photo-1596633605700-1efc9b49e277?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+
     category: "Tahu & Tempe",
     shortDescription: "Tempe goreng renyah yang dimasak dengan bumbu kecap manis dan irisan cabe.",
     cookingTime: "25 Menit",
@@ -155,7 +155,7 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   {
     id: "r6",
     title: "Mie Goreng Tek Tek",
-    image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+
     category: "Mie",
     shortDescription: "Mie goreng gerobakan dengan aroma bumbu kemiri yang kuat dan gurih.",
     cookingTime: "20 Menit",
@@ -184,7 +184,7 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   {
     id: "r7",
     title: "Soto Ayam Kuah Kuning",
-    image: "https://images.unsplash.com/photo-1604328471151-b52226907017?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+
     category: "Ayam",
     shortDescription: "Soto ayam dengan kuah kaldu segar bumbu kuning lengkap dengan koya.",
     cookingTime: "60 Menit",
@@ -211,7 +211,7 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   {
     id: "r8",
     title: "Es Teh Kampul",
-    image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+
     category: "Minuman",
     shortDescription: "Es teh manis segar khas Solo dengan irisan jeruk peras yang mengambang.",
     cookingTime: "5 Menit",

@@ -1,4 +1,5 @@
 import type { Recipe } from '../types';
+import { getRecipeImage } from '../utils/imageUtils';
 import './RecipeCard.css';
 
 interface RecipeCardProps {
@@ -19,8 +20,8 @@ export function RecipeCard({ recipe, onClick, index, isSaved, onToggleSave, isLi
     >
       <div className="recipe-image-container" onClick={() => onClick(recipe)}>
         <img 
-          src={recipe.image} 
-          alt={recipe.title} 
+          src={getRecipeImage(recipe)} 
+          alt={`${recipe.title} - Resep Racikin`} 
           className="recipe-image"
           loading="lazy"
         />

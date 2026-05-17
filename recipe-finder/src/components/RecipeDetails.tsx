@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { Recipe } from '../types';
+import { getRecipeImage } from '../utils/imageUtils';
 import './RecipeDetails.css';
 
 interface RecipeDetailsProps {
@@ -31,7 +32,7 @@ export function RecipeDetails({ recipe, onClose, isSaved, onToggleSave, isLiked,
         </button>
 
         <div className="modal-hero">
-          <img src={recipe.image} alt={recipe.title} className="modal-image" />
+          <img src={getRecipeImage(recipe)} alt={`${recipe.title} - Resep Racikin`} className="modal-image" />
           <div className="modal-hero-gradient"></div>
           <div className="modal-hero-content">
             <span className="modal-category">{recipe.category}</span>
