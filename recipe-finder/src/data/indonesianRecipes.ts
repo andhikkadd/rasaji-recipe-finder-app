@@ -1,238 +1,487 @@
 import type { Recipe } from '../types';
 
 export const INDONESIAN_RECIPES: Recipe[] = [
+  // --- AYAM (CHICKEN) ---
   {
     id: "r1",
-    title: "Nasi Goreng Kampung",
-
-    category: "Nasi",
-    shortDescription: "Nasi goreng simpel ala rumahan dengan bumbu ulek yang harum dan pedas manis.",
-    cookingTime: "15 Menit",
-    difficulty: "Mudah",
-    servings: 2,
-    caloriesEstimate: 450,
-    likes: 1205,
-    tags: ["Cepat & Simpel", "Nasi & Mie", "Pedas"],
-    ingredients: [
-      "2 piring Nasi Putih dingin",
-      "2 butir Telur",
-      "3 siung Bawang Merah",
-      "2 siung Bawang Putih",
-      "3 buah Cabe Rawit",
-      "1 sdm Kecap Manis",
-      "Garam dan lada secukupnya"
-    ],
-    steps: [
-      "Haluskan bawang merah, bawang putih, dan cabe.",
-      "Panaskan minyak, tumis bumbu halus hingga harum.",
-      "Sisihkan bumbu di tepi wajan, masukkan telur dan orak-arik.",
-      "Masukkan nasi putih, aduk rata dengan bumbu dan telur.",
-      "Tambahkan kecap manis, garam, dan lada. Masak hingga matang dan sajikan hangat."
-    ],
-    tips: "Gunakan nasi yang sudah diinapkan semalaman di kulkas agar tidak lembek saat digoreng.",
-    alternativeIngredients: "Ganti cabe rawit dengan cabe merah besar jika tidak suka terlalu pedas."
-  },
-  {
-    id: "r2",
-    title: "Ayam Geprek Spesial",
-
+    title: "Ayam Goreng Lengkuas Rempah",
     category: "Ayam",
-    shortDescription: "Ayam goreng tepung renyah yang digeprek hancur dengan sambal bawang super pedas.",
-    cookingTime: "30 Menit",
+    shortDescription: "Ayam goreng klasik dengan taburan serundeng lengkuas yang super gurih dan melimpah. Rahasia makan nambah nasi!",
+    cookingTime: "45 Menit",
     difficulty: "Sedang",
     servings: 4,
     caloriesEstimate: 520,
-    likes: 980,
-    tags: ["Lauk Harian", "Ayam", "Pedas"],
+    likes: 3205,
+    tags: ["Lauk Harian", "Ayam", "Gorengan", "Tradisional"],
     ingredients: [
-      "500g Dada Ayam fillet",
-      "1 bungkus Tepung Bumbu Serbaguna",
-      "10 buah Cabe Rawit Merah",
-      "3 siung Bawang Putih",
-      "Minyak panas secukupnya",
-      "Garam dan penyedap rasa"
+      "1 ekor ayam pejantan (potong 8 bagian)",
+      "150 gram lengkuas muda (parut kasar)",
+      "2 lembar daun salam & 2 lembar daun jeruk",
+      "1 batang serai (memarkan)",
+      "Bumbu Halus: 8 siung bawang merah, 5 siung bawang putih",
+      "Bumbu Halus: 3 butir kemiri, 1 sdm ketumbar bubuk",
+      "Bumbu Halus: 1 ruas kunyit, 1 ruas jahe",
+      "Garam, kaldu jamur, dan sedikit gula pasir"
     ],
     steps: [
-      "Baluri ayam dengan tepung bumbu basah, lalu gulingkan ke tepung bumbu kering.",
-      "Goreng ayam dalam minyak panas hingga kuning keemasan dan renyah. Tiriskan.",
-      "Ulek kasar cabe rawit, bawang putih, garam, dan penyedap.",
-      "Siram sambal ulek dengan 2 sdm minyak panas sisa menggoreng ayam.",
-      "Letakkan ayam di atas piring, lalu geprek bersama sambal hingga merata."
+      "Siapkan wajan besar. Masukkan ayam, bumbu halus, lengkuas parut, daun salam, daun jeruk, dan serai. Aduk rata sambil dipijat lembut agar bumbu meresap.",
+      "Tuang air secukupnya hingga ayam setengah terendam. Nyalakan kompor dengan api sedang.",
+      "Ungkep ayam hingga air menyusut habis dan bumbu meresap sempurna. Angkat ayam dan pisahkan dari sisa bumbu lengkuasnya.",
+      "Panaskan minyak yang cukup banyak. Goreng ayam hingga kuning keemasan. Jangan terlalu lama agar daging tidak keras.",
+      "Setelah ayam matang, kecilkan api dan goreng sisa bumbu lengkuas tadi. Aduk terus hingga warnanya kecoklatan dan teksturnya renyah (serundeng).",
+      "Tiriskan serundeng menggunakan saringan halus. Taburkan di atas ayam goreng panas."
     ],
-    tips: "Siraman minyak panas sangat penting untuk mematangkan bawang putih mentah pada sambal.",
+    tips: "Gunakan lengkuas yang masih muda agar hasil serundengnya tidak berserat keras bak kayu. Memeras sedikit air lengkuas parut sebelum diungkep juga bisa mengurangi rasa getir.",
+    alternativeIngredients: "Bisa menggunakan ayam broiler, namun kurangi takaran air saat mengungkep karena ayam broiler mengeluarkan banyak air."
   },
   {
-    id: "r3",
-    title: "Sayur Asem Segar",
-
-    category: "Sayur",
-    shortDescription: "Sayur kuah asam segar dengan isian melinjo, jagung manis, dan kacang panjang.",
-    cookingTime: "40 Menit",
+    id: "r2",
+    title: "Ayam Rica-Rica Khas Manado",
+    category: "Ayam",
+    shortDescription: "Pedas, wangi, dan menggugah selera! Potongan ayam yang dimasak dengan bumbu tumbuk kasar dan daun kemangi yang harum.",
+    cookingTime: "50 Menit",
     difficulty: "Sedang",
     servings: 5,
-    caloriesEstimate: 120,
-    likes: 845,
-    tags: ["Sayur", "Sehat", "Lauk Harian"],
+    caloriesEstimate: 450,
+    likes: 2140,
+    tags: ["Ayam", "Pedas", "Lauk Harian"],
     ingredients: [
-      "1 ikat Kacang Panjang (potong)",
-      "1 buah Jagung Manis (potong melintang)",
-      "50g Buah Melinjo",
-      "1 genggam Daun Melinjo",
-      "1 buah Labu Siam (potong dadu)",
-      "3 sdm Asam Jawa",
-      "1 blok Kaldu Sapi",
-      "Bumbu halus: 5 Bawang merah, 3 Bawang putih, 3 Cabe merah, 1 sdt terasi"
+      "1/2 ekor ayam (potong agak kecil, cuci bersih)",
+      "2 ikat daun kemangi (petik daunnya)",
+      "3 lembar daun jeruk & 1 lembar daun pandan (iris kasar)",
+      "1 batang serai (geprek)",
+      "1 buah jeruk nipis",
+      "Bumbu Tumbuk Kasar: 15 buah cabe merah keriting, 10 cabe rawit merah",
+      "Bumbu Tumbuk Kasar: 8 siung bawang merah, 4 siung bawang putih",
+      "Bumbu Tumbuk Kasar: 2 cm jahe"
     ],
     steps: [
-      "Rebus air hingga mendidih. Masukkan bumbu halus dan jagung serta melinjo.",
-      "Masak hingga jagung dan melinjo empuk.",
-      "Masukkan labu siam dan kacang panjang, didihkan kembali.",
-      "Tambahkan air asam jawa, kaldu, garam, dan sedikit gula. Aduk rata.",
-      "Terakhir masukkan daun melinjo, masak sebentar lalu angkat."
+      "Kucuri potongan ayam dengan air jeruk nipis dan taburi sedikit garam. Diamkan 15 menit, lalu goreng setengah matang (jangan sampai terlalu kering).",
+      "Panaskan 4 sendok makan minyak sisa menggoreng ayam. Tumis bumbu yang sudah ditumbuk kasar bersama daun jeruk, daun pandan, dan serai hingga benar-benar harum dan tidak langu.",
+      "Masukkan ayam goreng ke dalam tumisan bumbu. Aduk rata hingga semua bagian ayam terbalut bumbu kemerahan.",
+      "Tuang sekitar 150ml air matang. Tambahkan garam, sedikit gula, dan kaldu bubuk. Masak dengan api sedang hingga air menyusut dan bumbu meresap ke dalam daging.",
+      "Tepat sebelum kompor dimatikan, masukkan daun kemangi. Aduk cepat selama 30 detik hingga layu. Angkat dan sajikan selagi panas!"
     ],
-    tips: "Sajikan bersama ikan asin dan sambal terasi untuk kenikmatan maksimal."
+    tips: "Kunci rica-rica yang sedap ada di tekstur bumbunya. Jangan blender bumbu sampai halus seperti bubur; ulek kasar atau gunakan chopper sebentar saja agar tekstur cabe dan bawangnya masih terasa saat digigit.",
+    alternativeIngredients: "Daun pandan bisa dilewati jika sulit dicari, tapi menambahkannya akan memberikan aroma khas Manado yang sangat otentik."
   },
-  {
-    id: "r4",
-    title: "Telur Dadar Padang",
 
+  // --- TELUR (EGG) ---
+  {
+    id: "r3",
+    title: "Telur Bumbu Balado Merah",
     category: "Telur",
-    shortDescription: "Telur dadar tebal, gurih, dan mengembang sempurna ala restoran Padang.",
-    cookingTime: "15 Menit",
-    difficulty: "Mudah",
-    servings: 3,
-    caloriesEstimate: 210,
-    likes: 1540,
-    tags: ["Anak Kos", "Hemat", "Telur", "Cepat & Simpel"],
-    ingredients: [
-      "4 butir Telur Bebek (atau ayam)",
-      "2 sdm Tepung Beras",
-      "1 batang Daun Bawang (iris tipis)",
-      "3 siung Bawang Merah (iris)",
-      "1 lembar Daun Kunyit (iris sangat halus)",
-      "1 sdm Bumbu Merah Dasar (Cabe ulek)",
-      "Minyak agak banyak untuk menggoreng"
-    ],
-    steps: [
-      "Kocok lepas telur bersama bumbu merah, bawang merah, daun bawang, dan daun kunyit.",
-      "Tambahkan tepung beras, aduk rata hingga tidak ada yang bergerindil.",
-      "Panaskan minyak agak banyak di wajan cekung sampai benar-benar panas.",
-      "Tuang adonan telur. Gunakan api sedang cenderung kecil agar matang hingga ke dalam.",
-      "Balik perlahan ketika bagian bawah sudah kokoh dan kecoklatan. Angkat dan potong-potong."
-    ],
-    tips: "Gunakan telur bebek agar hasilnya lebih gurih dan tebal. Pastikan minyak benar-benar panas saat telur dituang."
-  },
-  {
-    id: "r5",
-    title: "Orek Tempe Manis Pedas",
-
-    category: "Tahu & Tempe",
-    shortDescription: "Tempe goreng renyah yang dimasak dengan bumbu kecap manis dan irisan cabe.",
+    shortDescription: "Sajian praktis favorit keluarga. Telur rebus goreng dengan balutan bumbu balado merah yang pedas manis.",
     cookingTime: "25 Menit",
     difficulty: "Mudah",
     servings: 4,
-    caloriesEstimate: 280,
-    likes: 1102,
-    tags: ["Anak Kos", "Hemat", "Lauk Harian"],
+    caloriesEstimate: 210,
+    likes: 4520,
+    tags: ["Telur", "Pedas", "Cepat & Simpel", "Anak Kos"],
     ingredients: [
-      "1 papan Tempe (potong korek api)",
-      "4 siung Bawang Merah",
-      "2 siung Bawang Putih",
-      "3 buah Cabe Merah Besar (iris serong)",
-      "3 sdm Kecap Manis",
-      "1 ruas Lengkuas (geprek)",
-      "1 lembar Daun Salam"
+      "6 butir telur ayam (rebus hingga matang, kupas)",
+      "2 lembar daun jeruk",
+      "1 buah tomat merah ukuran sedang (potong kasar)",
+      "Bumbu Halus: 10 buah cabe merah keriting",
+      "Bumbu Halus: 5 buah cabe rawit (sesuaikan selera pedas)",
+      "Bumbu Halus: 6 siung bawang merah, 2 siung bawang putih",
+      "Garam, gula merah, dan kaldu bubuk"
     ],
     steps: [
-      "Goreng tempe hingga kering dan renyah. Angkat dan tiriskan.",
-      "Tumis bawang merah, bawang putih, lengkuas, dan daun salam hingga wangi.",
-      "Masukkan irisan cabe merah, aduk sebentar.",
-      "Tambahkan kecap manis, sedikit air, garam, dan penyedap. Masak hingga bumbu agak mengental.",
-      "Masukkan tempe goreng, aduk cepat hingga bumbu merata. Angkat."
+      "Panaskan minyak agak banyak. Goreng telur rebus sebentar saja hingga bagian luarnya sedikit berkulit dan keriput. Angkat dan tiriskan (hati-hati minyak bisa meletup).",
+      "Kurangi minyak di wajan, sisakan sekitar 3 sdm. Tumis bumbu halus dan daun jeruk hingga harum dan warna cabenya menjadi lebih merah matang.",
+      "Masukkan potongan tomat, aduk-aduk sambil ditekan sedikit hingga tomat hancur dan menyatu dengan bumbu.",
+      "Bumbui dengan garam, sisiran gula merah, dan kaldu bubuk. Koreksi rasa. Bumbu balado yang enak harus seimbang antara pedas, gurih, dan sedikit manis.",
+      "Masukkan telur yang sudah digoreng. Aduk pelan hingga seluruh telur terselimuti bumbu merah merona. Sajikan hangat."
     ],
-    alternativeIngredients: "Bisa ditambahkan kacang tanah goreng agar lebih renyah dan gurih."
+    tips: "Agar minyak tidak meletup saat menggoreng telur rebus, pastikan telur benar-benar kering setelah dikupas, atau taburi wajan dengan sedikit tepung terigu sebelum memasukkan telur.",
+    alternativeIngredients: "Telur bisa diganti atau dicampur dengan potongan tahu goreng atau kentang dadu goreng."
+  },
+  {
+    id: "r4",
+    title: "Fuyunghai ala Warteg (Telur Dadar Sayur)",
+    category: "Telur",
+    shortDescription: "Omelet tebal gaya lokal yang renyah di luar, empuk di dalam, disiram saus asam manis gurih.",
+    cookingTime: "30 Menit",
+    difficulty: "Mudah",
+    servings: 3,
+    caloriesEstimate: 340,
+    likes: 1890,
+    tags: ["Telur", "Cepat & Simpel", "Anak Kos", "Sayur"],
+    ingredients: [
+      "4 butir telur",
+      "50 gram kol (iris sangat tipis)",
+      "1 buah wortel ukuran kecil (parut kasar)",
+      "1 batang daun bawang (iris halus)",
+      "2 sdm tepung tapioka (larutkan dengan sedikit air)",
+      "Garam dan merica secukupnya",
+      "Bahan Saus: 1/2 bawang bombay (iris), 1 siung bawang putih (cincang)",
+      "Bahan Saus: 3 sdm saus tomat, 1 sdt saus tiram, larutan maizena"
+    ],
+    steps: [
+      "Siapkan mangkuk besar. Masukkan telur, kol iris, wortel parut, daun bawang, larutan tapioka, garam, dan merica. Kocok rata hingga semua bahan menyatu.",
+      "Panaskan minyak yang cukup banyak di wajan cekung. Setelah benar-benar panas, tuang adonan telur dari jarak agak tinggi agar telur langsung keriting.",
+      "Kecilkan api agar bagian dalamnya matang. Setelah bagian bawah kokoh dan kecoklatan, balik perlahan. Angkat setelah matang sempurna dan tiriskan minyaknya.",
+      "Untuk saus: Tumis bawang putih dan bombay hingga layu. Masukkan saus tomat, saus tiram, air secukupnya, gula, dan sedikit garam.",
+      "Setelah saus mendidih dan rasanya pas (asam manis segar), tuang larutan maizena sedikit demi sedikit sambil diaduk cepat hingga mengental.",
+      "Sajikan fuyunghai tebal di piring, lalu siram dengan saus asam manis hangat."
+    ],
+    tips: "Kunci tekstur fuyunghai yang tebal dan keriting ada di minyak yang banyak dan panas, serta tambahan sedikit larutan tapioka pada adonan telur.",
+    alternativeIngredients: "Bisa tambahkan suwiran ayam rebus, kornet, atau cincangan udang ke dalam adonan telur untuk rasa yang lebih mewah."
+  },
+
+  // --- DAGING (MEAT) ---
+  {
+    id: "r5",
+    title: "Rendang Daging Sapi Padang Asli",
+    category: "Daging",
+    shortDescription: "Raja makanan dunia! Daging sapi yang dimasak perlahan dalam santan dan rempah hingga menghitam, empuk, dan kaya rasa.",
+    cookingTime: "3 Jam",
+    difficulty: "Sulit",
+    servings: 8,
+    caloriesEstimate: 650,
+    likes: 8900,
+    tags: ["Daging", "Tradisional", "Lauk Harian"],
+    ingredients: [
+      "1 kg Daging Sapi (pilih bagian paha/gandik, potong kotak tebal)",
+      "1 liter Santan Kental & 1 liter Santan Cair (dari 3 butir kelapa parut)",
+      "3 lembar daun kunyit, 5 lembar daun jeruk, 2 batang serai (geprek)",
+      "1 buah asam kandis",
+      "Bumbu Halus: 150g cabe merah keriting (sesuaikan selera)",
+      "Bumbu Halus: 15 butir bawang merah, 7 butir bawang putih",
+      "Bumbu Halus: 3 cm jahe, 3 cm lengkuas, 2 cm kunyit",
+      "Bumbu Halus: 1 sdm ketumbar, 1/2 sdt pala bubuk"
+    ],
+    steps: [
+      "Siapkan wajan raksasa. Masukkan santan cair, semua bumbu halus, daun kunyit, daun jeruk, serai, dan asam kandis. Aduk perlahan sambil direbus dengan api sedang.",
+      "Terus aduk perlahan agar santan tidak pecah. Setelah mendidih dan mengeluarkan aroma wangi rempah yang kuat, masukkan potongan daging sapi.",
+      "Masak terus sambil sesekali diaduk. Setelah santan menyusut dan mulai kental (menjadi kalio), tuangkan santan kental.",
+      "Kecilkan api. Proses ini menuntut kesabaran ekstra. Anda harus memasaknya selama berjam-jam sambil terus diaduk dari dasar wajan agar tidak gosong.",
+      "Daging akan perlahan menyerap santan yang berubah menjadi minyak. Warnanya akan menggelap dari coklat menjadi hitam kemerahan.",
+      "Matikan api ketika bumbu sudah mengering, menempel pada daging, dan mengeluarkan minyak kelapa yang wangi. Rendang siap disajikan!"
+    ],
+    tips: "Rahasia rendang yang awet berminggu-minggu adalah memasaknya hingga benar-benar kering dari air (tersisa hanya minyak). Mengaduk rendang tidak boleh asal; gunakan teknik 'menimba' dari bawah ke atas agar daging tidak hancur.",
+    alternativeIngredients: "Jika tidak suka daging sapi, bumbu rendang ini sangat cocok digunakan untuk memasak ayam kampung, telur rebus, atau paru."
   },
   {
     id: "r6",
-    title: "Mie Goreng Tek Tek",
-
-    category: "Mie",
-    shortDescription: "Mie goreng gerobakan dengan aroma bumbu kemiri yang kuat dan gurih.",
-    cookingTime: "20 Menit",
-    difficulty: "Mudah",
-    servings: 2,
-    caloriesEstimate: 420,
-    likes: 2310,
-    tags: ["Nasi & Mie", "Cepat & Simpel", "Lauk Harian"],
-    ingredients: [
-      "1 bungkus Mie Telur Kering (rebus matang)",
-      "1 butir Telur",
-      "3 lembar Kol (iris kasar)",
-      "1 batang Sawi Hijau",
-      "2 sdm Kecap Manis",
-      "1 sdm Saus Tiram",
-      "Bumbu halus: 3 Bawang merah, 2 Bawang putih, 2 butir Kemiri"
-    ],
-    steps: [
-      "Panaskan sedikit minyak, masukkan telur dan orak-arik. Sisihkan di pinggir wajan.",
-      "Masukkan bumbu halus, tumis hingga matang dan harum.",
-      "Masukkan sayuran (kol, sawi), aduk hingga agak layu.",
-      "Masukkan mie rebus. Tambahkan kecap manis, saus tiram, lada, dan garam.",
-      "Aduk cepat dengan api besar hingga bumbu merata dan tercium aroma bakaran. Sajikan."
-    ]
-  },
-  {
-    id: "r7",
-    title: "Soto Ayam Kuah Kuning",
-
-    category: "Ayam",
-    shortDescription: "Soto ayam dengan kuah kaldu segar bumbu kuning lengkap dengan koya.",
+    title: "Sengkel Sapi Bumbu Lada Hitam",
+    category: "Daging",
+    shortDescription: "Irisan daging sengkel yang super empuk berlapis saus lada hitam kental yang pedas menghangatkan tenggorokan.",
     cookingTime: "60 Menit",
     difficulty: "Sedang",
-    servings: 6,
-    caloriesEstimate: 310,
-    likes: 3120,
-    tags: ["Lauk Harian", "Sayur", "Ayam"],
+    servings: 4,
+    caloriesEstimate: 420,
+    likes: 2410,
+    tags: ["Daging", "Mewah", "Pedas"],
     ingredients: [
-      "1/2 ekor Ayam",
-      "1 batang Serai (geprek)",
-      "3 lembar Daun Jeruk",
-      "Bumbu Halus: 6 Bawang merah, 4 Bawang putih, 2 ruas Kunyit, 1 sdt Ketumbar",
-      "Pelengkap: Soun, Tauge, Kol, Telur Rebus, Jeruk Nipis"
+      "500g Daging Sengkel Sapi (rebus hingga empuk, iris tipis)",
+      "1 buah bawang bombay ukuran besar (potong kotak besar)",
+      "1 buah paprika merah/hijau (potong dadu)",
+      "3 siung bawang putih (cincang halus)",
+      "1 sdm lada hitam butir (sangrai sebentar, tumbuk kasar)",
+      "3 sdm kecap manis, 2 sdm saus tiram, 1 sdm kecap inggris",
+      "Larutan maizena untuk mengentalkan"
     ],
     steps: [
-      "Rebus ayam dengan 1.5 liter air hingga matang dan berkaldu. Angkat ayam, suwir-suwir dagingnya.",
-      "Tumis bumbu halus bersama serai dan daun jeruk hingga harum dan matang.",
-      "Masukkan tumisan bumbu ke dalam kuah kaldu ayam. Beri garam dan gula, didihkan.",
-      "Siapkan mangkuk, tata soun, tauge, kol, dan ayam suwir.",
-      "Siram dengan kuah soto panas. Sajikan dengan telur rebus, jeruk nipis, dan sambal."
-    ]
+      "Tips merebus sengkel: gunakan panci presto selama 30 menit, atau rebus perlahan selama 1.5 jam hingga uratnya empuk transparan. Potong tipis melawan serat daging.",
+      "Panaskan sedikit minyak. Tumis bawang putih cincang hingga wangi. Masukkan potongan bawang bombay dan paprika, tumis cepat dengan api besar hingga layu namun masih renyah.",
+      "Masukkan irisan daging sapi empuk ke dalam wajan. Aduk sebentar.",
+      "Masukkan semua saus (kecap manis, saus tiram, kecap inggris) dan bintang utamanya: lada hitam yang sudah ditumbuk kasar. Tuang sedikit air kaldu rebusan daging.",
+      "Biarkan mendidih agar bumbu meresap. Koreksi rasa, tambahkan sedikit garam jika perlu.",
+      "Terakhir, tuang larutan maizena. Aduk cepat hingga sausnya mengental, berkilat, dan membalut setiap irisan daging dengan sempurna."
+    ],
+    tips: "Gunakan lada hitam butir utuh yang Anda tumbuk sendiri sebelum memasak. Aromanya akan jauh lebih kuat dan pedasnya lebih 'nendang' dibandingkan lada hitam bubuk botolan.",
+    alternativeIngredients: "Daging sengkel bisa diganti dengan daging has dalam (tenderloin) yang tidak perlu direbus lama. Cukup tumis cepat."
+  },
+
+  // --- SAYUR (VEGETABLES) ---
+  {
+    id: "r7",
+    title: "Tumis Kangkung Terasi Belacan",
+    category: "Sayur",
+    shortDescription: "Sayur kangkung hijau segar yang ditumis kilat dengan api besar, berpadu dengan aroma terasi bakar yang menggoda.",
+    cookingTime: "10 Menit",
+    difficulty: "Mudah",
+    servings: 3,
+    caloriesEstimate: 85,
+    likes: 5630,
+    tags: ["Sayur", "Cepat & Simpel", "Lauk Harian", "Pedas"],
+    ingredients: [
+      "2 ikat besar Kangkung (petik daun dan pucuk batangnya, cuci bersih)",
+      "1 sdt Terasi udang berkualitas (bakar/sangrai sebentar)",
+      "5 buah cabe rawit merah (iris serong)",
+      "4 siung bawang merah & 2 siung bawang putih (iris tipis)",
+      "1 buah tomat merah (potong kasar)",
+      "1 sdm saus tiram",
+      "Garam dan kaldu jamur"
+    ],
+    steps: [
+      "Persiapan mutlak: pastikan kangkung sudah dicuci bersih dan ditiriskan sampai tidak ada genangan air agar tumisan tidak berair.",
+      "Panaskan minyak di wajan hingga benar-benar panas (nyaris berasap).",
+      "Masukkan bawang merah, bawang putih, dan terasi yang sudah dihancurkan. Tumis super cepat hingga aromanya memuncak.",
+      "Masukkan irisan cabe dan tomat, aduk sebentar.",
+      "Masukkan kangkung. Tuang saus tiram, garam, dan kaldu jamur. Jangan ditinggal! Terus aduk cepat dengan api paling besar yang kompor Anda miliki.",
+      "Begitu kangkung layu (hanya butuh sekitar 1-2 menit), segera matikan api dan pindahkan ke piring saji agar tidak layu berlebihan dan warnanya tetap hijau zamrud."
+    ],
+    tips: "Rahasia kangkung restoran yang tetap hijau dan renyah adalah menumis dengan porsi minyak yang sedikit lebih banyak, panas wajan yang maksimal, dan durasi memasak yang sangat singkat.",
+    alternativeIngredients: "Bisa ditambahkan telur puyuh rebus atau udang kupas utuh di tahap awal penumisan."
   },
   {
     id: "r8",
-    title: "Es Teh Kampul",
-
-    category: "Minuman",
-    shortDescription: "Es teh manis segar khas Solo dengan irisan jeruk peras yang mengambang.",
-    cookingTime: "5 Menit",
+    title: "Sayur Lodeh Labu Siam Buncis",
+    category: "Sayur",
+    shortDescription: "Sayur lodeh rumahan dengan kuah santan kuning yang ringan, gurih, dan nyaman di perut.",
+    cookingTime: "30 Menit",
     difficulty: "Mudah",
-    servings: 1,
-    caloriesEstimate: 90,
-    likes: 755,
-    tags: ["Cepat & Simpel"],
+    servings: 6,
+    caloriesEstimate: 150,
+    likes: 1240,
+    tags: ["Sayur", "Lauk Harian", "Hemat"],
     ingredients: [
-      "1 kantong Teh Celup (aroma melati)",
-      "2 sdm Gula Pasir",
-      "1 buah Jeruk Peras / Jeruk Nipis (iris tipis)",
-      "Es Batu secukupnya",
-      "200ml Air Panas"
+      "2 buah labu siam sedang (potong bentuk korek api tebal)",
+      "150g buncis (iris miring)",
+      "1 papan tempe (potong dadu, goreng setengah matang)",
+      "500ml santan cair & 200ml santan kental",
+      "2 lembar daun salam, 1 ruas lengkuas (geprek)",
+      "Bumbu Halus: 6 bawang merah, 3 bawang putih",
+      "Bumbu Halus: 3 buah kemiri sangrai, 1 ruas kunyit bakar",
+      "Garam, gula merah, dan ketumbar bubuk"
     ],
     steps: [
-      "Seduh teh celup dengan air panas hingga warnanya pekat.",
-      "Tambahkan gula pasir, aduk hingga larut sepenuhnya.",
-      "Siapkan gelas berisi es batu, tuang teh manis.",
-      "Masukkan 2-3 irisan jeruk ke dalam gelas. Aduk sebentar agar aroma jeruk keluar.",
-      "Nikmati selagi dingin."
-    ]
+      "Remas perlahan irisan labu siam dengan 1 sendok teh garam, lalu cuci bersih. Ini dilakukan agar getahnya hilang dan teksturnya sedikit lemas.",
+      "Tumis bumbu halus bersama daun salam dan lengkuas dengan sedikit minyak hingga matang dan wangi.",
+      "Tuang santan cair ke dalam wajan. Aduk-aduk dan tunggu hingga mendidih. Pastikan santan tidak pecah.",
+      "Masukkan labu siam, buncis, dan tempe goreng. Tambahkan garam, ketumbar bubuk, dan sisiran gula merah.",
+      "Setelah sayuran empuk, kecilkan api dan tuang santan kental.",
+      "Aduk perlahan hingga kuah mendidih perlahan (mendidih bintik-bintik). Matikan kompor. Kuah lodeh yang sempurna tidak terlalu pekat, melainkan segar dan gurih manis."
+    ],
+    tips: "Gula merah adalah kunci keseimbangan rasa sayur lodeh. Jangan gunakan gula pasir karena profil manisnya akan berbeda.",
+    alternativeIngredients: "Isian lodeh sangat fleksibel. Tambahkan irisan cabe ijo besar, terong, melinjo, atau kacang panjang sesuai selera."
+  },
+
+  // --- TAHU & TEMPE ---
+  {
+    id: "r9",
+    title: "Tahu Crispy Cabe Garam",
+    category: "Tahu & Tempe",
+    shortDescription: "Camilan atau lauk yang bikin ketagihan! Potongan tahu sutra berbalut tepung renyah, ditumis dengan tumpukan bawang putih dan cabe.",
+    cookingTime: "25 Menit",
+    difficulty: "Mudah",
+    servings: 3,
+    caloriesEstimate: 310,
+    likes: 6720,
+    tags: ["Tahu & Tempe", "Camilan", "Pedas", "Cepat & Simpel"],
+    ingredients: [
+      "1 buah Tahu Sutra / Tofu Tiongkok ukuran besar (potong dadu)",
+      "5 sdm tepung maizena & 1 sdt kaldu bubuk (untuk baluran)",
+      "10 siung bawang putih (cincang super halus)",
+      "8 buah cabe rawit merah & 2 cabe merah keriting (iris bulat tipis)",
+      "2 batang daun bawang (iris halus)",
+      "Minyak untuk menggoreng dan menumis",
+      "Garam dan lada putih bubuk secukupnya"
+    ],
+    steps: [
+      "Tiriskan tahu sutra dari airnya menggunakan tisu dapur agar tidak terlalu basah.",
+      "Siapkan wadah berisi tepung maizena dan kaldu bubuk. Gulingkan potongan tahu hingga terselimuti tipis. Langsung goreng di minyak panas dengan api besar hingga kulit luarnya keras dan renyah. Angkat, tiriskan.",
+      "Siapkan wajan bersih, panaskan 3 sendok makan minyak (atau margarin agar lebih gurih).",
+      "Masukkan cincangan bawang putih. Gunakan api sangat kecil. Goreng bawang putih perlahan hingga warnanya mulai menguning krispi (hati-hati, bawang putih cepat gosong dan pahit).",
+      "Begitu bawang putih menguning, masukkan irisan cabe dan daun bawang. Aduk cepat selama 30 detik.",
+      "Masukkan tahu crispy ke dalam wajan. Taburkan garam dan lada putih secukupnya. Toss (aduk lempar) sebentar agar bumbu cabe garam menempel di permukaan tahu. Sajikan segera!"
+    ],
+    tips: "Bawang putih cincang akan mudah menggumpal dan gosong jika digoreng dengan api besar. Rahasianya: goreng bawang putih dari saat minyak masih hangat dengan api kecil.",
+    alternativeIngredients: "Resep ini bisa diaplikasikan persis sama untuk jamur tiram, tempe, atau cumi goreng tepung."
+  },
+  {
+    id: "r10",
+    title: "Tempe Mendoan Purwokerto Asli",
+    category: "Tahu & Tempe",
+    shortDescription: "Gorengan tempe lebar berbalut adonan tepung basah dan irisan daun bawang. Digoreng setengah matang (mendo) sehingga lemes dan gurih.",
+    cookingTime: "15 Menit",
+    difficulty: "Mudah",
+    servings: 5,
+    caloriesEstimate: 250,
+    likes: 4100,
+    tags: ["Tahu & Tempe", "Camilan", "Hemat", "Tradisional"],
+    ingredients: [
+      "1 papan tempe khusus mendoan (tempe lembaran tipis, atau tempe biasa yang diiris sangat tipis melebar)",
+      "150g tepung terigu protein sedang",
+      "50g tepung beras (agar tidak terlalu lembek)",
+      "4 batang daun bawang (iris kasar, porsinya harus banyak)",
+      "Bumbu Halus: 3 bawang putih, 1 ruas kencur, 1 sdt ketumbar",
+      "Air dingin/es secukupnya",
+      "Garam dan kaldu penyedap"
+    ],
+    steps: [
+      "Siapkan adonan tepung: campur tepung terigu, tepung beras, bumbu halus, garam, dan kaldu penyedap.",
+      "Tuang air es sedikit demi sedikit hingga mendapatkan adonan yang cukup kental namun bisa mengalir. Memakai air es membuat tekstur adonan lebih krispi di pinggiran.",
+      "Masukkan potongan daun bawang yang melimpah ke dalam adonan. Aduk rata.",
+      "Celupkan lembaran tempe ke dalam adonan tepung hingga tertutup sempurna.",
+      "Panaskan minyak dengan api sedang. Goreng tempe cukup selama 2-3 menit saja! Ciri khas mendoan adalah teksturnya yang 'mendo' (setengah matang/lembek), bukan garing krispi.",
+      "Angkat dan tiriskan. Sajikan panas-panas dengan cocolan sambal kecap pedas manis."
+    ],
+    tips: "Aroma khas mendoan asli berasal dari kencur pada bumbu halusnya. Jangan lewatkan bahan ini!",
+    alternativeIngredients: "Cocolan wajib: kecap manis, irisan cabe rawit, bawang merah iris, dan sedikit perasan jeruk limau."
+  },
+
+  // --- NASI & MIE ---
+  {
+    id: "r11",
+    title: "Nasi Liwet Sunda Magic Com",
+    category: "Nasi",
+    shortDescription: "Cara paling modern membuat nasi liwet tradisional! Nasi gurih beraroma rempah dan ikan asin yang dimasak langsung di rice cooker.",
+    cookingTime: "40 Menit",
+    difficulty: "Mudah",
+    servings: 4,
+    caloriesEstimate: 380,
+    likes: 3125,
+    tags: ["Nasi", "Hemat", "Anak Kos"],
+    ingredients: [
+      "3 cup beras (cuci bersih)",
+      "50 gram ikan teri jengki atau teri medan (goreng kering)",
+      "5 siung bawang merah & 3 siung bawang putih (iris tipis)",
+      "3 lembar daun salam, 2 batang serai (geprek), 2 lembar daun jeruk",
+      "5 buah cabe rawit merah utuh",
+      "Air secukupnya (takaran sama seperti memasak nasi biasa)",
+      "Garam, sedikit kaldu jamur, dan 1 sdm minyak bekas menggoreng teri"
+    ],
+    steps: [
+      "Panaskan 2 sdm minyak goreng (lebih enak pakai minyak sisa menggoreng teri). Tumis irisan bawang merah dan bawang putih hingga layu dan harum.",
+      "Masukkan daun salam, daun jeruk, dan serai. Tumis sebentar hingga aromanya keluar.",
+      "Siapkan rice cooker. Masukkan beras yang sudah dicuci, air secukupnya, dan hasil tumisan bumbu beserta minyaknya ke dalam panci rice cooker.",
+      "Tambahkan garam, kaldu jamur, dan cabe rawit utuh. Aduk rata. Jangan lupa cicipi airnya, pastikan rasanya sudah pas dan agak asin.",
+      "Taburkan setengah dari teri goreng di atas beras. Nyalakan rice cooker pada mode 'Cook'.",
+      "Setelah matang dan berbunyi 'klik', buka tutup rice cooker. Aduk nasinya dengan hati-hati. Taburkan sisa teri goreng di atasnya. Tutup kembali biarkan hangat."
+    ],
+    tips: "Minyak sisa menggoreng ikan teri adalah 'emas cair' yang akan membuat nasi liwet Anda luar biasa harum dan mengkilap.",
+    alternativeIngredients: "Sajikan bersama lauk pelengkap seperti tahu goreng, ayam goreng, sambal terasi, dan lalapan segar."
+  },
+  {
+    id: "r12",
+    title: "Mie Nyemek Pedas Abang-Abang",
+    category: "Mie",
+    shortDescription: "Mie rebus tapi kuahnya kental dan sedikit (nyemek). Dimasak dengan bumbu ulek yang nendang dan topping sayur melimpah.",
+    cookingTime: "15 Menit",
+    difficulty: "Mudah",
+    servings: 1,
+    caloriesEstimate: 510,
+    likes: 9550,
+    tags: ["Mie", "Pedas", "Cepat & Simpel", "Anak Kos"],
+    ingredients: [
+      "1 bungkus Mie Instan rasa Kari Ayam atau Ayam Bawang",
+      "1 butir telur ayam",
+      "Segenggam sawi hijau (caisim) dan irisan kol",
+      "1 batang daun bawang (iris kasar)",
+      "Bumbu Ulek: 3 bawang merah, 1 bawang putih, 5 cabe rawit merah",
+      "1 sdm kecap manis",
+      "1 sdm saus sambal botolan"
+    ],
+    steps: [
+      "Tumis bumbu ulek dengan sedikit minyak hingga harum matang. Pastikan wajan Anda cukup panas.",
+      "Sisihkan bumbu di tepi wajan. Masukkan telur, tunggu beberapa detik, lalu orak-arik cepat hingga hancur namun masih bertekstur.",
+      "Tuang air sekitar 250ml (lebih sedikit dari takaran mie kuah normal). Tunggu hingga mendidih berbual-bual.",
+      "Masukkan mie instan, sawi, dan kol.",
+      "Masukkan semua bumbu bawaan mie instan, ditambah kecap manis dan saus sambal.",
+      "Aduk terus dengan api besar hingga mie matang dan kuahnya menyusut drastis menjadi kental pekat. Terakhir masukkan irisan daun bawang. Angkat ke piring."
+    ],
+    tips: "Rahasia mie nyemek yang enak ada di penambahan kecap manis dan saus sambal yang dikaramelisasi bersama kuah yang mengental.",
+    alternativeIngredients: "Tambahkan irisan sosis, bakso sapi, atau kerupuk pangsit untuk meniru porsi warkop mewah."
+  },
+
+  // --- IKAN (FISH) ---
+  {
+    id: "r13",
+    title: "Ikan Nila Bakar Bumbu Kecap",
+    category: "Ikan",
+    shortDescription: "Ikan bakar manis gurih ala restoran seafood. Daging ikannya lembut, bumbu kecap meresap sampai ke tulang.",
+    cookingTime: "40 Menit",
+    difficulty: "Sedang",
+    servings: 2,
+    caloriesEstimate: 320,
+    likes: 2100,
+    tags: ["Ikan", "Mewah", "Lauk Harian"],
+    ingredients: [
+      "2 ekor ikan nila ukuran sedang (kerat-kerat badannya)",
+      "1 buah jeruk nipis & garam (untuk melumuri ikan)",
+      "Bumbu Oles: 5 sdm kecap manis, 1 sdm mentega cair",
+      "Bumbu Halus (untuk diungkep & olesan): 5 bawang merah, 3 bawang putih",
+      "Bumbu Halus: 1 sdt ketumbar, 2 cm kunyit, 1 cm jahe",
+      "Minyak secukupnya untuk menumis"
+    ],
+    steps: [
+      "Cuci bersih ikan nila, buang insang dan isi perut. Kucuri dengan jeruk nipis dan garam. Diamkan 15 menit, lalu bilas.",
+      "Tumis bumbu halus dengan sedikit minyak hingga matang dan harum.",
+      "Pindahkan setengah dari bumbu halus matang ke dalam mangkuk. Campurkan dengan kecap manis dan mentega cair. Ini akan jadi bumbu oles saat membakar.",
+      "Sisa bumbu halus di wajan, tambahkan sedikit air. Masukkan ikan, ungkep sebentar saja (sekitar 3 menit tiap sisi) agar ikan setengah matang dan bumbu dasar meresap. (Langkah ini opsional namun direkomendasikan agar ikan matang sempurna tanpa gosong di panggangan).",
+      "Siapkan panggangan arang atau teflon anti lengket. Panggang ikan dengan api sedang.",
+      "Olesi ikan berulang kali dengan racikan bumbu kecap di kedua sisinya. Balik ikan perlahan. Angkat ketika kulitnya mulai terkaramelisasi dan sedikit gosong wangi."
+    ],
+    tips: "Mentega cair pada bumbu oles tidak hanya memberikan rasa gurih, tapi juga membuat ikan tampak mengkilat cantik dan tidak mudah lengket di teflon.",
+    alternativeIngredients: "Ganti ikan nila dengan gurame atau ikan bawal. Resep ini juga cocok untuk membakar ayam."
+  },
+
+  // --- SAMBAL ---
+  {
+    id: "r14",
+    title: "Sambal Matah Bali Asli",
+    category: "Sambal",
+    shortDescription: "Sambal mentah khas Bali yang sangat wangi, segar, dan meledak di mulut. Jodoh terbaik untuk ikan bakar atau ayam goreng.",
+    cookingTime: "10 Menit",
+    difficulty: "Mudah",
+    servings: 4,
+    caloriesEstimate: 95,
+    likes: 10450,
+    tags: ["Sambal", "Pedas", "Cepat & Simpel"],
+    ingredients: [
+      "15 butir bawang merah (iris tipis)",
+      "15 buah cabe rawit merah (iris halus)",
+      "3 batang serai (ambil bagian putih yang paling muda, iris super tipis)",
+      "5 lembar daun jeruk (buang tulang daunnya, iris tipis memanjang seperti benang)",
+      "1 sdt terasi bakar (hancurkan hingga menjadi bubuk halus)",
+      "1 sdt garam, 1/2 sdt kaldu jamur",
+      "2 buah jeruk limau (ambil airnya)",
+      "4 sdm minyak kelapa murni (bisa diganti minyak goreng biasa)"
+    ],
+    steps: [
+      "Masukkan irisan bawang merah, cabe rawit, serai, daun jeruk, dan terasi bubuk ke dalam mangkuk keramik atau kaca tebal.",
+      "Tambahkan garam dan kaldu jamur. Jangan diaduk pakai sendok; gunakan tangan (pakai sarung tangan plastik) untuk meremas bumbu secara perlahan agar minyak asirinya keluar namun bawang tidak hancur.",
+      "Panaskan minyak kelapa di teflon kecil sampai benar-benar mendidih dan mengeluarkan sedikit asap.",
+      "Tuangkan minyak panas tersebut ke dalam mangkuk berisi irisan bumbu mentah tadi. Anda akan mendengar suara 'cess' yang keras dan aroma serai akan langsung tercium wangi.",
+      "Kucuri dengan perasan air jeruk limau. Aduk rata dengan sendok. Koreksi rasa.",
+      "Diamkan sekitar 10 menit sebelum disajikan agar minyak menyerap seluruh rasa rempah."
+    ],
+    tips: "Jangan pernah memasak sambal ini di atas kompor. Cukup disiram minyak yang sangat panas. Minyak kelapa akan memberikan rasa autentik Bali yang luar biasa dibandingkan minyak kelapa sawit biasa.",
+    alternativeIngredients: "Tambahkan irisan bunga kecombrang segar jika Anda ingin membawa sambal ini ke level aromatik yang lebih dewa."
+  },
+
+  // --- MINUMAN (DRINKS) ---
+  {
+    id: "r15",
+    title: "Es Cendol Dawet Gula Aren",
+    category: "Minuman",
+    shortDescription: "Minuman dingin tradisional pelepas dahaga. Butiran cendol hijau kenyal yang berenang di kuah santan dan lelehan gula aren legit.",
+    cookingTime: "30 Menit",
+    difficulty: "Sedang",
+    servings: 4,
+    caloriesEstimate: 210,
+    likes: 2100,
+    tags: ["Minuman", "Tradisional", "Manis"],
+    ingredients: [
+      "Bahan Cendol: 100g tepung beras, 30g tepung sagu aren/tapioka",
+      "Bahan Cendol: 500ml air perasan pandan & suji (atau pasta pandan)",
+      "Bahan Kuah Santan: 400ml santan kelapa, 1/2 sdt garam, 1 lembar daun pandan",
+      "Bahan Sirup Gula: 250g gula aren/merah (sisir), 100ml air, 1 lembar daun pandan",
+      "Es batu secukupnya, serut/pecahkan"
+    ],
+    steps: [
+      "Buat Sirup Gula: Rebus air bersama gula aren dan daun pandan hingga gula larut dan agak kental. Saring dan dinginkan.",
+      "Buat Kuah Santan: Rebus santan, garam, dan daun pandan sambil terus diaduk perlahan agar santan tidak pecah. Tunggu hingga mendidih, matikan api, dinginkan.",
+      "Buat Cendol: Campur tepung beras, tepung sagu, dan air pandan di dalam panci (dalam keadaan api mati). Aduk rata hingga tidak bergerindil.",
+      "Nyalakan api kecil, masak adonan cendol sambil terus diaduk. Adonan akan menjadi sangat kental, lengket, dan berwarna hijau transparan. Matikan api.",
+      "Siapkan baskom berisi air es (air matang dingin + es batu). Cetak adonan cendol panas menggunakan saringan cendol atau plastik segitiga bolong ujungnya langsung ke atas baskom air es. Biarkan butiran cendol mengeras, lalu tiriskan.",
+      "Penyajian: Siapkan gelas. Tuang 3 sdm sirup gula aren di dasar gelas. Masukkan es batu, tambahkan 4 sdm cendol, lalu siram perlahan dengan kuah santan. Nikmati dingin."
+    ],
+    tips: "Saat mencetak cendol, pastikan air di bawah cetakan benar-benar berisi bongkahan es batu. Kejutan suhu dingin ekstrim inilah yang membuat bentuk cendol tidak hancur dan teksturnya kenyal.",
+    alternativeIngredients: "Sebagai variasi modern, santan bisa diganti dengan susu full cream cair untuk rasa yang lebih creamy ala kafe."
   }
 ];
