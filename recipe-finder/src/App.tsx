@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { SearchBar } from './components/SearchBar';
 import { RecipeList } from './components/RecipeList';
 import { RecipeDetails } from './components/RecipeDetails';
@@ -7,150 +7,223 @@ import { AiIngredientSearch } from './components/AiIngredientSearch';
 import { AiRecipeCard } from './components/AiRecipeCard';
 import { IngredientCtaCard } from './components/IngredientCtaCard';
 import { generateRecipeIdeasFromIngredients } from './services/aiRecipeService';
-import { fetchRecipes } from './services/recipeApi';
+import {
+  searchRecipes,
+  getLatestRecipes,
+  getPopularRecipes,
+  getRecipesByCategory,
+  toggleLike as apiToggleLike,
+  toggleBookmark as apiToggleBookmark,
+  incrementView,
+  cacheExternalRecipe,
+} from './services/recipeApi';
+import { searchExternalRecipes } from './services/externalSearchService';
 import type { Recipe, AiRecipe } from './types';
 import './App.css';
 
 function App() {
-  const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [aiRecipes, setAiRecipes] = useState<AiRecipe[]>([]);
-  
+
   const [savedRecipes, setSavedRecipes] = useState<string[]>(() => {
-    const saved = localStorage.getItem('savedRecipes_v2');
+    const saved = localStorage.getItem('racikin_bookmarks');
     return saved ? JSON.parse(saved) : [];
   });
 
   const [likedRecipes, setLikedRecipes] = useState<string[]>(() => {
-    const liked = localStorage.getItem('likedRecipes_v2');
+    const liked = localStorage.getItem('racikin_likes');
     return liked ? JSON.parse(liked) : [];
   });
-  
+
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  
+  const [searchQuery, setSearchQuery] = useState('');
+
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  
+
   const [activeTab, setActiveTab] = useState<'explore' | 'popular' | 'saved' | 'ai-search'>('explore');
 
-  // Load recipes from the API on mount
+  // ─── Load initial recipes ─────────────────────────────
   useEffect(() => {
-    fetchRecipes()
+    getLatestRecipes()
       .then(data => {
-        setAllRecipes(data);
         setRecipes(data);
         setIsLoading(false);
       })
       .catch(err => {
-        console.error('Failed to load recipes from API:', err);
-        // Fallback: try loading from static file
-        fetch('/data/recipes.json')
-          .then(res => res.json())
-          .then(data => {
-            setAllRecipes(data);
-            setRecipes(data);
-          })
-          .catch(() => {})
-          .finally(() => setIsLoading(false));
+        console.error('Failed to load recipes:', err);
+        setIsLoading(false);
       });
   }, []);
 
+  // ─── Persist likes/bookmarks ──────────────────────────
   useEffect(() => {
-    localStorage.setItem('savedRecipes_v2', JSON.stringify(savedRecipes));
+    localStorage.setItem('racikin_bookmarks', JSON.stringify(savedRecipes));
   }, [savedRecipes]);
 
   useEffect(() => {
-    localStorage.setItem('likedRecipes_v2', JSON.stringify(likedRecipes));
+    localStorage.setItem('racikin_likes', JSON.stringify(likedRecipes));
   }, [likedRecipes]);
 
-  const toggleSaveRecipe = (recipe: Recipe) => {
-    setSavedRecipes(prev => {
-      if (prev.includes(recipe.id)) {
-        return prev.filter(id => id !== recipe.id);
-      }
-      return [...prev, recipe.id];
-    });
-  };
+  // ─── Recipe actions ───────────────────────────────────
+  const handleToggleLike = useCallback((recipe: Recipe) => {
+    const isLiked = likedRecipes.includes(recipe.id);
+    // Optimistic update
+    setLikedRecipes(prev =>
+      isLiked ? prev.filter(id => id !== recipe.id) : [...prev, recipe.id]
+    );
+    // Persist to API (fire and forget)
+    if (!recipe._isExternalMock) {
+      apiToggleLike(recipe.id, isLiked ? 'unlike' : 'like').catch(() => {});
+    }
+  }, [likedRecipes]);
 
-  const toggleLikeRecipe = (recipe: Recipe) => {
-    setLikedRecipes(prev => {
-      if (prev.includes(recipe.id)) {
-        return prev.filter(id => id !== recipe.id);
-      }
-      return [...prev, recipe.id];
-    });
-  };
+  const handleToggleBookmark = useCallback((recipe: Recipe) => {
+    const isSaved = savedRecipes.includes(recipe.id);
+    setSavedRecipes(prev =>
+      isSaved ? prev.filter(id => id !== recipe.id) : [...prev, recipe.id]
+    );
+    if (!recipe._isExternalMock) {
+      apiToggleBookmark(recipe.id, isSaved ? 'unbookmark' : 'bookmark').catch(() => {});
+    }
+  }, [savedRecipes]);
 
-  const handleNormalSearch = async (query: string) => {
+  // ─── Open recipe detail ───────────────────────────────
+  const handleRecipeClick = useCallback(async (recipe: Recipe) => {
+    if (recipe._isExternalMock) {
+      // Cache the external recipe into the DB on first open
+      try {
+        const cached = await cacheExternalRecipe(recipe);
+        setSelectedRecipe(cached);
+      } catch {
+        // Fallback: show the mock recipe as-is
+        setSelectedRecipe(recipe);
+      }
+    } else {
+      setSelectedRecipe(recipe);
+      incrementView(recipe.id);
+    }
+  }, []);
+
+  // ─── Search ───────────────────────────────────────────
+  const handleSearch = useCallback(async (query: string) => {
     setActiveTab('explore');
-    setHasSearched(true);
     setSelectedCategory(null);
-    
-    if (!query) {
-      setRecipes(allRecipes);
+    setSearchQuery(query);
+
+    if (!query.trim()) {
       setHasSearched(false);
+      setIsLoading(true);
+      try {
+        const data = await getLatestRecipes();
+        setRecipes(data);
+      } catch {}
+      setIsLoading(false);
       return;
     }
 
-    // Try API search first
+    setHasSearched(true);
     setIsLoading(true);
+
     try {
-      const results = await fetchRecipes(query);
-      setRecipes(results);
-    } catch {
-      // Fallback to client-side filtering
-      const lowerQuery = query.toLowerCase();
-      const filtered = allRecipes.filter(r => 
-        r.title.toLowerCase().includes(lowerQuery) || 
-        r.tags.some(tag => tag.toLowerCase().includes(lowerQuery)) ||
-        r.ingredients.some(ing => ing.toLowerCase().includes(lowerQuery))
-      );
-      setRecipes(filtered);
+      // 1. Search internal DB
+      const internal = await searchRecipes(query);
+
+      // 2. Fetch external mock results (blended)
+      const external = await searchExternalRecipes(query);
+
+      // 3. Blend: internal first (already relevance-sorted), then external
+      // But interleave external results after every ~5 internal results
+      const blended: Recipe[] = [];
+      let extIdx = 0;
+      for (let i = 0; i < internal.length; i++) {
+        blended.push(internal[i]);
+        // Insert an external result after every 5 internal results
+        if ((i + 1) % 5 === 0 && extIdx < external.length) {
+          blended.push(external[extIdx++]);
+        }
+      }
+      // Add remaining external results
+      while (extIdx < external.length) {
+        blended.push(external[extIdx++]);
+      }
+
+      setRecipes(blended);
+    } catch (err) {
+      console.error('Search failed:', err);
+      setRecipes([]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const handleCategorySelect = (category: string | null) => {
+  // ─── Category filter ──────────────────────────────────
+  const handleCategorySelect = useCallback(async (category: string | null) => {
     setActiveTab('explore');
     setSelectedCategory(category);
-    
+    setSearchQuery('');
+
     if (!category || category === 'Semua') {
       setHasSearched(false);
-      setRecipes(allRecipes);
+      setIsLoading(true);
+      try {
+        const data = await getLatestRecipes();
+        setRecipes(data);
+      } catch {}
+      setIsLoading(false);
       return;
     }
 
     setHasSearched(true);
-    const filtered = allRecipes.filter(r => 
-      r.category === category || r.tags.includes(category)
-    );
-    setRecipes(filtered);
-  };
+    setIsLoading(true);
+    try {
+      const data = await getRecipesByCategory(category);
+      setRecipes(data);
+    } catch {}
+    setIsLoading(false);
+  }, []);
 
+  // ─── Tab handlers ─────────────────────────────────────
+  const handlePopularTab = useCallback(async () => {
+    setActiveTab('popular');
+    setIsLoading(true);
+    try {
+      const data = await getPopularRecipes();
+      setRecipes(data);
+    } catch {}
+    setIsLoading(false);
+  }, []);
+
+  const resetToExplore = useCallback(async () => {
+    setActiveTab('explore');
+    setHasSearched(false);
+    setSelectedCategory(null);
+    setSearchQuery('');
+    setIsLoading(true);
+    try {
+      const data = await getLatestRecipes();
+      setRecipes(data);
+    } catch {}
+    setIsLoading(false);
+  }, []);
+
+  // ─── AI search ────────────────────────────────────────
   const handleAiSearch = async (ingredients: string[]) => {
     setIsAiLoading(true);
     try {
       const ideas = await generateRecipeIdeasFromIngredients(ingredients, null);
       setAiRecipes(ideas);
-    } catch (error) {
-      console.error('Failed to generate AI recipes:', error);
+    } catch {
       setAiRecipes([]);
     } finally {
       setIsAiLoading(false);
     }
   };
 
-  const resetToExplore = () => {
-    setActiveTab('explore');
-    setHasSearched(false);
-    setRecipes(allRecipes);
-  };
-
-  // Derived data
-  const savedRecipesList = allRecipes.filter(r => savedRecipes.includes(r.id));
+  // ─── Derived ──────────────────────────────────────────
+  const bookmarkedRecipes = recipes.filter(r => savedRecipes.includes(r.id));
 
   return (
     <div className="app">
@@ -162,55 +235,37 @@ function App() {
           </svg>
           <h1 className="logo-text">Raci<span className="text-accent">kin</span></h1>
         </div>
-        
+
         <div className="nav-tabs">
-          <button 
-            className={`nav-tab ${activeTab === 'explore' ? 'active' : ''}`}
-            onClick={resetToExplore}
-          >
+          <button className={`nav-tab ${activeTab === 'explore' ? 'active' : ''}`} onClick={resetToExplore}>
             Eksplor
           </button>
-          <button 
-            className={`nav-tab ${activeTab === 'popular' ? 'active' : ''}`}
-            onClick={() => setActiveTab('popular')}
-          >
+          <button className={`nav-tab ${activeTab === 'popular' ? 'active' : ''}`} onClick={handlePopularTab}>
             Populer
           </button>
-          <button 
-            className={`nav-tab ${activeTab === 'saved' ? 'active' : ''}`}
-            onClick={() => setActiveTab('saved')}
-          >
+          <button className={`nav-tab ${activeTab === 'saved' ? 'active' : ''}`} onClick={() => setActiveTab('saved')}>
             Tersimpan ({savedRecipes.length})
           </button>
         </div>
       </header>
 
       <main className="app-main">
-        {/* AI Ingredient Search View (Isolated Page) */}
         {activeTab === 'ai-search' && (
           <div className="ai-search-view animate-fade-in">
-            <button className="back-btn" onClick={() => setActiveTab('explore')}>
-              ← Kembali ke Beranda
-            </button>
+            <button className="back-btn" onClick={() => setActiveTab('explore')}>← Kembali ke Beranda</button>
             <AiIngredientSearch onSearch={handleAiSearch} isLoading={isAiLoading} />
-            
             <div className="ai-recipes-grid">
               {isAiLoading ? (
                 <div className="recipes-loading">Meracik ide resep untukmu...</div>
               ) : aiRecipes.length > 0 ? (
-                aiRecipes.map(recipe => (
-                  <AiRecipeCard key={recipe.id} recipe={recipe} />
-                ))
+                aiRecipes.map(recipe => <AiRecipeCard key={recipe.id} recipe={recipe} />)
               ) : (
-                <div className="empty-state">
-                  <p>Belum ada hasil. Silakan masukkan bahan-bahan di atas.</p>
-                </div>
+                <div className="empty-state"><p>Belum ada hasil. Silakan masukkan bahan-bahan di atas.</p></div>
               )}
             </div>
           </div>
         )}
 
-        {/* Regular Explore View */}
         {activeTab === 'explore' && (
           <>
             <div className="hero-section">
@@ -218,77 +273,70 @@ function App() {
               <p className="hero-subtitle">Cari resep masakan Indonesia yang simpel, enak, dan cocok buat menu harian.</p>
             </div>
 
-            <SearchBar onSearch={handleNormalSearch} isLoading={isLoading} />
-            
-            {!hasSearched && (
-              <IngredientCtaCard onClick={() => setActiveTab('ai-search')} />
-            )}
+            <SearchBar onSearch={handleSearch} isLoading={isLoading} initialValue={searchQuery} />
 
-            <CategoryFilter 
-              onCategorySelect={handleCategorySelect} 
-              selectedCategory={selectedCategory} 
-            />
+            {!hasSearched && <IngredientCtaCard onClick={() => setActiveTab('ai-search')} />}
+
+            <CategoryFilter onCategorySelect={handleCategorySelect} selectedCategory={selectedCategory} />
 
             <h2 className="section-title">
               {hasSearched ? 'Hasil Pencarian' : 'Menu Harian Terbaru'}
             </h2>
-            
-            <RecipeList 
-              recipes={recipes} 
-              isLoading={isLoading} 
-              hasSearched={hasSearched} 
-              onRecipeClick={setSelectedRecipe} 
-              savedRecipes={savedRecipesList}
-              onToggleSave={toggleSaveRecipe}
+
+            <RecipeList
+              recipes={recipes}
+              isLoading={isLoading}
+              hasSearched={hasSearched}
+              onRecipeClick={handleRecipeClick}
+              savedRecipes={bookmarkedRecipes}
+              onToggleSave={handleToggleBookmark}
               likedRecipes={likedRecipes}
-              onToggleLike={toggleLikeRecipe}
+              onToggleLike={handleToggleLike}
             />
           </>
         )}
 
-        {/* Popular View */}
         {activeTab === 'popular' && (
           <>
             <h2 className="section-title">Resep Paling Populer</h2>
-            <RecipeList 
-              recipes={allRecipes} 
-              isLoading={isLoading} 
-              hasSearched={true} 
-              onRecipeClick={setSelectedRecipe} 
-              savedRecipes={savedRecipesList}
-              onToggleSave={toggleSaveRecipe}
+            <RecipeList
+              recipes={recipes}
+              isLoading={isLoading}
+              hasSearched={true}
+              onRecipeClick={handleRecipeClick}
+              savedRecipes={bookmarkedRecipes}
+              onToggleSave={handleToggleBookmark}
               likedRecipes={likedRecipes}
-              onToggleLike={toggleLikeRecipe}
+              onToggleLike={handleToggleLike}
             />
           </>
         )}
 
-        {/* Saved View */}
         {activeTab === 'saved' && (
           <>
             <h2 className="section-title">Resep Tersimpan Kamu</h2>
-            <RecipeList 
-              recipes={savedRecipesList} 
-              isLoading={false} 
-              hasSearched={true} 
-              onRecipeClick={setSelectedRecipe} 
-              savedRecipes={savedRecipesList}
-              onToggleSave={toggleSaveRecipe}
+            <RecipeList
+              recipes={bookmarkedRecipes}
+              isLoading={false}
+              hasSearched={true}
+              onRecipeClick={handleRecipeClick}
+              savedRecipes={bookmarkedRecipes}
+              onToggleSave={handleToggleBookmark}
               likedRecipes={likedRecipes}
-              onToggleLike={toggleLikeRecipe}
+              onToggleLike={handleToggleLike}
             />
           </>
         )}
       </main>
 
       {selectedRecipe && (
-        <RecipeDetails 
-          recipe={selectedRecipe} 
-          onClose={() => setSelectedRecipe(null)} 
+        <RecipeDetails
+          recipe={selectedRecipe}
+          onClose={() => setSelectedRecipe(null)}
           isSaved={savedRecipes.includes(selectedRecipe.id)}
-          onToggleSave={() => toggleSaveRecipe(selectedRecipe)}
+          onToggleSave={() => handleToggleBookmark(selectedRecipe)}
           isLiked={likedRecipes.includes(selectedRecipe.id)}
-          onToggleLike={() => toggleLikeRecipe(selectedRecipe)}
+          onToggleLike={() => handleToggleLike(selectedRecipe)}
         />
       )}
     </div>

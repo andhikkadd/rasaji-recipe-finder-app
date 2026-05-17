@@ -272,37 +272,100 @@ h3 {
   color: #3730a3;
 }
 
-.ai-actions-section {
+.modal-badges {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.modal-verified {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.9);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.recipe-source-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
   background: #f8fafc;
-  border: 1px dashed #cbd5e1;
-  padding: 1.5rem;
-  border-radius: 12px;
-  margin-top: 2rem;
-}
-
-.ai-actions-title {
-  color: #334155;
-  margin-bottom: 0.5rem;
-  font-size: 1.1rem;
-}
-
-.ai-actions-desc {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.85rem;
   color: #64748b;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
 }
 
-.ai-action-buttons {
+.recipe-source-info a {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.recipe-source-info a:hover {
+  text-decoration: underline;
+}
+
+.info-box.tools {
+  background: #fce7f3;
+  color: #9d174d;
+}
+
+.info-box.tools ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0 0;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
-.ai-btn {
+.info-box.tools li {
+  background: rgba(255,255,255,0.6);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+/* ─── Tanya Racikin AI Section ──────────────── */
+.ai-assistant-section {
+  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  border: 1px solid #a7f3d0;
+  padding: 1.5rem;
+  border-radius: 16px;
+  margin-top: 2rem;
+}
+
+.ai-assistant-title {
+  color: #065f46;
+  margin-bottom: 0.25rem;
+  font-size: 1.15rem;
+}
+
+.ai-assistant-desc {
+  color: #047857;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.ai-quick-questions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.ai-quick-btn {
   background: white;
-  border: 1px solid #cbd5e1;
-  color: #475569;
-  padding: 0.5rem 1rem;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+  padding: 0.45rem 0.9rem;
   border-radius: 100px;
   font-size: 0.85rem;
   font-weight: 500;
@@ -310,8 +373,119 @@ h3 {
   transition: all 0.2s;
 }
 
-.ai-btn:hover {
-  background: #f1f5f9;
-  border-color: #94a3b8;
-  color: #1e293b;
+.ai-quick-btn:hover {
+  background: #d1fae5;
+  border-color: #6ee7b7;
+  transform: translateY(-1px);
 }
+
+.ai-quick-btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.ai-input-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.ai-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid #a7f3d0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: white;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.ai-input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.ai-input::placeholder {
+  color: #94a3b8;
+}
+
+.ai-send-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.ai-send-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: scale(1.05);
+}
+
+.ai-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ai-response-card {
+  background: white;
+  border: 1px solid #d1fae5;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.ai-response-card.loading {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.ai-thinking {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #047857;
+  font-size: 0.9rem;
+}
+
+.thinking-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  animation: dotBounce 1.2s infinite ease-in-out;
+}
+
+.thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.ai-response-question {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ai-response-answer {
+  color: #1e293b;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+

@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,16 +11,34 @@ datasource db {
 }
 
 model Recipe {
-  id           String   @id @default(uuid())
-  title        String
-  url          String?  @unique
-  imageUrl     String?
-  prepTime     String?
-  cookTime     String?
-  servings     String?
-  ingredients  String
-  instructions String
-  tags         String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                     String   @id @default(uuid())
+  slug                   String   @unique
+  title                  String
+  image                  String?
+  category               String   @default("Lainnya")
+  shortDescription       String?
+  fullDescription        String?
+  ingredients            String   // JSON array
+  tools                  String?  // JSON array
+  steps                  String   // JSON array
+  tips                   String?
+  alternativeIngredients String?
+  prepTime               String?
+  cookTime               String?
+  cookingTime            String?
+  difficulty             String   @default("Sedang")
+  servings               String?
+  caloriesEstimate       Int      @default(0)
+  tags                   String   // JSON array
+  keywords               String?  // JSON array
+  sourceType             String   @default("internal")
+  sourceUrl              String?  @unique
+  sourceName             String?
+  status                 String   @default("verified")
+  isVerified             Boolean  @default(false)
+  likes                  Int      @default(0)
+  bookmarks              Int      @default(0)
+  views                  Int      @default(0)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 }

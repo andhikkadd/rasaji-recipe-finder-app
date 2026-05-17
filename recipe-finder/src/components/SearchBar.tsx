@@ -1,30 +1,71 @@
+import { useState, useEffect, useRef } from 'react';
 import './SearchBar.css';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
   isLoading: boolean;
+  initialValue?: string;
 }
 
-export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
+export function SearchBar({ onSearch, isLoading, initialValue = '' }: SearchBarProps) {
+  const [value, setValue] = useState(initialValue);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const isFirstRender = useRef(true);
+
+  // Sync with external initialValue changes (e.g., category reset)
+  useEffect(() => {
+    if (initialValue !== value) {
+      setValue(initialValue);
+    }
+  }, [initialValue]);
+
+  // Debounced search on typing
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    debounceRef.current = setTimeout(() => {
+      onSearch(value.trim());
+    }, 400);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [value]);
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const form = e.currentTarget;
-    const input = form.elements.namedItem('search') as HTMLInputElement;
-    if (input.value.trim()) {
-      onSearch(input.value.trim());
-    }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    onSearch(value.trim());
+  };
+
+  const handleClear = () => {
+    setValue('');
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    onSearch('');
   };
 
   return (
     <div className="search-container animate-fade-in">
       <form className="search-form glass" onSubmit={handleSubmit}>
-        <input 
-          type="text" 
-          name="search"
-          placeholder="Cari resep, misal: ayam geprek, nasi goreng, sop, mie..." 
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="Cari resep, misal: ayam geprek, nasi goreng, mie..."
           className="search-input"
           autoComplete="off"
+          id="search-input"
         />
+        {value && (
+          <button type="button" className="search-clear-btn" onClick={handleClear} aria-label="Clear search">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        )}
         <button type="submit" className="search-btn" disabled={isLoading}>
           {isLoading ? (
             <div className="spinner"></div>
