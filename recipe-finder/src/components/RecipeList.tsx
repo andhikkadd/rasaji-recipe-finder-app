@@ -7,9 +7,11 @@ interface RecipeListProps {
   onRecipeClick: (recipe: Recipe) => void;
   isLoading: boolean;
   hasSearched: boolean;
+  savedRecipes: Recipe[];
+  onToggleSave: (recipe: Recipe) => void;
 }
 
-export function RecipeList({ recipes, onRecipeClick, isLoading, hasSearched }: RecipeListProps) {
+export function RecipeList({ recipes, onRecipeClick, isLoading, hasSearched, savedRecipes, onToggleSave }: RecipeListProps) {
   if (isLoading) {
     return (
       <div className="recipes-loading">
@@ -52,6 +54,8 @@ export function RecipeList({ recipes, onRecipeClick, isLoading, hasSearched }: R
           recipe={recipe} 
           onClick={onRecipeClick}
           index={index}
+          isSaved={savedRecipes.some(r => r.idMeal === recipe.idMeal)}
+          onToggleSave={onToggleSave}
         />
       ))}
     </div>
