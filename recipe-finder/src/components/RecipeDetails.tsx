@@ -45,20 +45,22 @@ export function RecipeDetails({ recipe, onClose, isSaved, onToggleSave, isLiked,
             <div className="modal-meta-grid">
               <div className="meta-item">
                 <span className="meta-icon">⏱️</span>
-                <span className="meta-text">{recipe.cookingTime}</span>
+                <span className="meta-text">{recipe.cookingTime || recipe.cookTime || recipe.prepTime || '-'}</span>
               </div>
               <div className="meta-item">
                 <span className="meta-icon">👨‍🍳</span>
-                <span className="meta-text">{recipe.difficulty}</span>
+                <span className="meta-text">{recipe.difficulty || 'Sedang'}</span>
               </div>
               <div className="meta-item">
                 <span className="meta-icon">🍽️</span>
-                <span className="meta-text">{recipe.servings} Porsi</span>
+                <span className="meta-text">{recipe.servings || '-'} Porsi</span>
               </div>
-              <div className="meta-item">
-                <span className="meta-icon">🔥</span>
-                <span className="meta-text">{recipe.caloriesEstimate} Kkal</span>
-              </div>
+              {recipe.caloriesEstimate > 0 && (
+                <div className="meta-item">
+                  <span className="meta-icon">🔥</span>
+                  <span className="meta-text">{recipe.caloriesEstimate} Kkal</span>
+                </div>
+              )}  
             </div>
             
             <div className="modal-buttons">
@@ -69,7 +71,7 @@ export function RecipeDetails({ recipe, onClose, isSaved, onToggleSave, isLiked,
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                 </svg>
-                <span>{recipe.likes + (isLiked ? 1 : 0)} Suka</span>
+                <span>{(recipe.likes || 0) + (isLiked ? 1 : 0)} Suka</span>
               </button>
               <button 
                 className={`action-btn save-btn ${isSaved ? 'active' : ''}`}
@@ -105,7 +107,7 @@ export function RecipeDetails({ recipe, onClose, isSaved, onToggleSave, isLiked,
             <div className="recipe-instructions">
               <h3>Cara Memasak</h3>
               <ol className="instruction-list">
-                {recipe.steps.map((step, i) => (
+                {(recipe.steps?.length ? recipe.steps : recipe.instructions || []).map((step, i) => (
                   <li key={i}>{step}</li>
                 ))}
               </ol>

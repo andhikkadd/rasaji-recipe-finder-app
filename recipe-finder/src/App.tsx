@@ -7,12 +7,14 @@ import { AiIngredientSearch } from './components/AiIngredientSearch';
 import { AiRecipeCard } from './components/AiRecipeCard';
 import { IngredientCtaCard } from './components/IngredientCtaCard';
 import { generateRecipeIdeasFromIngredients } from './services/aiRecipeService';
-import { INDONESIAN_RECIPES } from './data/indonesianRecipes';
+import { fetchRecipes } from './services/recipeApi';
 import type { Recipe, AiRecipe } from './types';
 import './App.css';
 
 function App() {
-  const [recipes, setRecipes] = useState<Recipe[]>(INDONESIAN_RECIPES);
+  const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [aiRecipes, setAiRecipes] = useState<AiRecipe[]>([]);
   
   const [savedRecipes, setSavedRecipes] = useState<string[]>(() => {
@@ -31,8 +33,29 @@ function App() {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
-  // Navigation State
   const [activeTab, setActiveTab] = useState<'explore' | 'popular' | 'saved' | 'ai-search'>('explore');
+
+  // Load recipes from the API on mount
+  useEffect(() => {
+    fetchRecipes()
+      .then(data => {
+        setAllRecipes(data);
+        setRecipes(data);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to load recipes from API:', err);
+        // Fallback: try loading from static file
+        fetch('/data/recipes.json')
+          .then(res => res.json())
+          .then(data => {
+            setAllRecipes(data);
+            setRecipes(data);
+          })
+          .catch(() => {})
+          .finally(() => setIsLoading(false));
+      });
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('savedRecipes_v2', JSON.stringify(savedRecipes));
@@ -60,24 +83,34 @@ function App() {
     });
   };
 
-  const handleNormalSearch = (query: string) => {
+  const handleNormalSearch = async (query: string) => {
     setActiveTab('explore');
     setHasSearched(true);
     setSelectedCategory(null);
     
     if (!query) {
-      setRecipes(INDONESIAN_RECIPES);
+      setRecipes(allRecipes);
       setHasSearched(false);
       return;
     }
 
-    const lowerQuery = query.toLowerCase();
-    const filtered = INDONESIAN_RECIPES.filter(r => 
-      r.title.toLowerCase().includes(lowerQuery) || 
-      r.tags.some(tag => tag.toLowerCase().includes(lowerQuery)) ||
-      r.ingredients.some(ing => ing.toLowerCase().includes(lowerQuery))
-    );
-    setRecipes(filtered);
+    // Try API search first
+    setIsLoading(true);
+    try {
+      const results = await fetchRecipes(query);
+      setRecipes(results);
+    } catch {
+      // Fallback to client-side filtering
+      const lowerQuery = query.toLowerCase();
+      const filtered = allRecipes.filter(r => 
+        r.title.toLowerCase().includes(lowerQuery) || 
+        r.tags.some(tag => tag.toLowerCase().includes(lowerQuery)) ||
+        r.ingredients.some(ing => ing.toLowerCase().includes(lowerQuery))
+      );
+      setRecipes(filtered);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCategorySelect = (category: string | null) => {
@@ -86,12 +119,12 @@ function App() {
     
     if (!category || category === 'Semua') {
       setHasSearched(false);
-      setRecipes(INDONESIAN_RECIPES);
+      setRecipes(allRecipes);
       return;
     }
 
     setHasSearched(true);
-    const filtered = INDONESIAN_RECIPES.filter(r => 
+    const filtered = allRecipes.filter(r => 
       r.category === category || r.tags.includes(category)
     );
     setRecipes(filtered);
@@ -110,14 +143,19 @@ function App() {
     }
   };
 
+  const resetToExplore = () => {
+    setActiveTab('explore');
+    setHasSearched(false);
+    setRecipes(allRecipes);
+  };
+
   // Derived data
-  const popularRecipesList = [...INDONESIAN_RECIPES].sort((a, b) => b.likes - a.likes);
-  const savedRecipesList = INDONESIAN_RECIPES.filter(r => savedRecipes.includes(r.id));
+  const savedRecipesList = allRecipes.filter(r => savedRecipes.includes(r.id));
 
   return (
     <div className="app">
       <header className="app-header">
-        <div className="logo-container" onClick={() => { setActiveTab('explore'); setHasSearched(false); setRecipes(INDONESIAN_RECIPES); }}>
+        <div className="logo-container" onClick={resetToExplore}>
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="logo-icon">
             <path d="M12 2v20"></path>
             <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
@@ -128,7 +166,7 @@ function App() {
         <div className="nav-tabs">
           <button 
             className={`nav-tab ${activeTab === 'explore' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('explore'); setHasSearched(false); setRecipes(INDONESIAN_RECIPES); }}
+            onClick={resetToExplore}
           >
             Eksplor
           </button>
@@ -180,7 +218,7 @@ function App() {
               <p className="hero-subtitle">Cari resep masakan Indonesia yang simpel, enak, dan cocok buat menu harian.</p>
             </div>
 
-            <SearchBar onSearch={handleNormalSearch} isLoading={false} />
+            <SearchBar onSearch={handleNormalSearch} isLoading={isLoading} />
             
             {!hasSearched && (
               <IngredientCtaCard onClick={() => setActiveTab('ai-search')} />
@@ -197,7 +235,7 @@ function App() {
             
             <RecipeList 
               recipes={recipes} 
-              isLoading={false} 
+              isLoading={isLoading} 
               hasSearched={hasSearched} 
               onRecipeClick={setSelectedRecipe} 
               savedRecipes={savedRecipesList}
@@ -213,8 +251,8 @@ function App() {
           <>
             <h2 className="section-title">Resep Paling Populer</h2>
             <RecipeList 
-              recipes={popularRecipesList} 
-              isLoading={false} 
+              recipes={allRecipes} 
+              isLoading={isLoading} 
               hasSearched={true} 
               onRecipeClick={setSelectedRecipe} 
               savedRecipes={savedRecipesList}

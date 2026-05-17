@@ -17,9 +17,10 @@ const FALLBACK_IMAGES: Record<string, string> = {
 const DEFAULT_FALLBACK = 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800'; // Default to a nice rice dish
 
 export function getRecipeImage(recipe: Recipe): string {
-  // If the recipe has a specific image, use it
-  if (recipe.image && recipe.image.trim() !== '') {
-    return recipe.image;
+  // If the recipe has a specific image from the API or static data, use it
+  const img = recipe.image || (recipe as any).imageUrl;
+  if (img && img.trim() !== '') {
+    return img;
   }
   
   // Otherwise, use the category fallback

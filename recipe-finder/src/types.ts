@@ -1,14 +1,19 @@
 export interface Recipe {
   id: string;
   title: string;
-  image?: string;
+  url?: string;
+  image?: string;       // kept for backward compatibility
+  imageUrl?: string;    // from API
   category: string;
   shortDescription: string;
   cookingTime: string;
-  difficulty: 'Mudah' | 'Sedang' | 'Sulit';
-  servings: number;
+  prepTime?: string;
+  cookTime?: string;
+  difficulty: string;
+  servings: number | string;
   ingredients: string[];
-  steps: string[];
+  steps: string[];         // kept for backward compatibility
+  instructions?: string[]; // from API
   caloriesEstimate: number;
   tags: string[];
   likes: number;
