@@ -1,0 +1,44 @@
+.region-filter-container {
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.region-list {
+  display: flex;
+  overflow-x: auto;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.region-list::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.region-chip {
+  padding: 0.5rem 1rem;
+  white-space: nowrap;
+  border-radius: 100px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.region-chip:hover:not(:disabled) {
+  color: var(--text-primary);
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.region-chip.active {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+.region-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
