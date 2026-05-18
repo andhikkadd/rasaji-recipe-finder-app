@@ -21,6 +21,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
+    sameSite: 'lax',
     secure: false, // Set to true in production with HTTPS
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   },
@@ -33,6 +34,20 @@ function optionalAuth(req, _res, next) {
   next();
 }
 app.use(optionalAuth);
+
+// ─── Admin Middleware ─────────────────────────────────────
+async function requireAdmin(req, res, next) {
+  if (!req.userId) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.userId } });
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    next();
+  } catch (err) {
+    res.status(500).json({ error: 'Server error checking admin status' });
+  }
+}
 
 // ─── Auth Endpoints ───────────────────────────────────────
 
@@ -292,7 +307,7 @@ app.get('/api/recipes/slug/:slug', async (req, res) => {
     const recipe = await prisma.recipe.findUnique({
       where: { slug: req.params.slug },
     });
-    if (!recipe) return res.status(404).json({ error: 'Recipe not found' });
+    if (!recipe || recipe.status === 'rejected') return res.status(404).json({ error: 'Recipe not found' });
     res.json(formatRecipe(recipe));
   } catch (error) {
     console.error('Slug error:', error);
@@ -306,7 +321,7 @@ app.get('/api/recipes/:id', async (req, res) => {
     const recipe = await prisma.recipe.findUnique({
       where: { id: req.params.id },
     });
-    if (!recipe) return res.status(404).json({ error: 'Recipe not found' });
+    if (!recipe || recipe.status === 'rejected') return res.status(404).json({ error: 'Recipe not found' });
     res.json(formatRecipe(recipe));
   } catch (error) {
     console.error('Get recipe error:', error);
@@ -699,6 +714,88 @@ app.post('/api/ai/ask-recipe', async (req, res) => {
 });
 
 
+// ─── Smart Dynamic Fallback Generator ─────────────────────
+const SWEET_KEYWORDS = ['kue', 'cake', 'bolu', 'brownies', 'puding', 'pudding', 'donat', 'roti', 'biskuit', 'cookies', 'pancake', 'waffle', 'es krim', 'coklat', 'chocolate', 'gula', 'madu', 'klepon', 'onde', 'lapis', 'nastar', 'kastengel', 'dadar gulung', 'serabi', 'martabak manis', 'pisang', 'kolak', 'setup', 'manisan', 'selai', 'panna cotta', 'mousse', 'tart', 'pie'];
+const DRINK_KEYWORDS = ['teh', 'kopi', 'jus', 'susu', 'smoothie', 'milkshake', 'es', 'wedang', 'bandrek', 'bajigur', 'sekoteng', 'cendol', 'dawet', 'cincau', 'sirup', 'lemon', 'jahe', 'kunyit', 'soda', 'mocktail', 'kelapa'];
+const PROTEIN_KEYWORDS = ['ayam', 'sapi', 'babi', 'kambing', 'bebek', 'ikan', 'udang', 'cumi', 'kepiting', 'kerang', 'lobster', 'gurita', 'tongkol', 'tuna', 'salmon', 'lele', 'nila', 'patin', 'bandeng', 'mujair', 'daging', 'telur'];
+
+function detectQueryCategory(query) {
+  const q = query.toLowerCase();
+  for (const kw of SWEET_KEYWORDS) { if (q.includes(kw)) return 'sweet'; }
+  for (const kw of DRINK_KEYWORDS) { if (q.includes(kw)) return 'drink'; }
+  for (const kw of PROTEIN_KEYWORDS) { if (q.includes(kw)) return 'protein'; }
+  return 'generic';
+}
+
+function capitalizeWords(str) {
+  return str.replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function generateDynamicFallback(query) {
+  const category = detectQueryCategory(query);
+  const q = capitalizeWords(query.trim());
+  let templates = [];
+
+  switch (category) {
+    case 'protein':
+      templates = [
+        { title: `${q} Kecap`, category: 'Lauk', tags: ['Protein', 'Kecap'] },
+        { title: `${q} Goreng Rempah`, category: 'Lauk', tags: ['Protein', 'Goreng'] },
+        { title: `${q} Rica-Rica`, category: 'Lauk', tags: ['Protein', 'Pedas'] },
+        { title: `${q} Bakar Bumbu Rujak`, category: 'Lauk', tags: ['Protein', 'Bakar'] },
+      ];
+      break;
+    case 'sweet':
+      templates = [
+        { title: `${q} Kukus Lembut`, category: 'Kue & Dessert', tags: ['Kue', 'Kukus'] },
+        { title: `${q} Panggang`, category: 'Kue & Dessert', tags: ['Kue', 'Panggang'] },
+        { title: `${q} Lumer`, category: 'Kue & Dessert', tags: ['Dessert', 'Manis'] },
+        { title: `${q} Spesial Rumahan`, category: 'Kue & Dessert', tags: ['Kue', 'Rumahan'] },
+      ];
+      break;
+    case 'drink':
+      templates = [
+        { title: `Es ${q} Segar`, category: 'Minuman', tags: ['Minuman', 'Es'] },
+        { title: `${q} Hangat`, category: 'Minuman', tags: ['Minuman', 'Hangat'] },
+        { title: `${q} Susu`, category: 'Minuman', tags: ['Minuman', 'Susu'] },
+        { title: `${q} Spesial`, category: 'Minuman', tags: ['Minuman'] },
+      ];
+      break;
+    case 'generic':
+    default:
+      templates = [
+        { title: `Resep ${q} Rumahan`, category: 'Lainnya', tags: ['Rumahan'] },
+        { title: `${q} Sederhana`, category: 'Lainnya', tags: ['Sederhana'] },
+        { title: `${q} ala Rumahan`, category: 'Lainnya', tags: ['Rumahan'] },
+        { title: `Ide Masakan ${q}`, category: 'Lainnya', tags: ['Ide Masakan'] },
+      ];
+      break;
+  }
+
+  return templates.map(t => ({
+    ...t,
+    id: `ext-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    slug: t.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, ''),
+    image: null,
+    shortDescription: `Resep ${t.title} dari sumber luar.`,
+    ingredients: ['Bahan akan ditampilkan setelah dibuka'],
+    steps: ['Langkah-langkah akan ditampilkan setelah dibuka'],
+    tools: [],
+    keywords: [query],
+    cookingTime: null,
+    difficulty: 'Sedang',
+    servings: null,
+    sourceUrl: null,
+    sourceName: 'Internet',
+    sourceType: 'external',
+    status: 'cached_unverified',
+    isVerified: false,
+    likes: 0, bookmarks: 0, views: 0,
+    caloriesEstimate: 0,
+    _isExternalMock: true,
+  }));
+}
+
 app.get('/api/external-search', async (req, res) => {
   try {
     const q = (req.query.q || '').trim().toLowerCase();
@@ -715,7 +812,6 @@ app.get('/api/external-search', async (req, res) => {
     for (const [keyword, recipes] of Object.entries(MOCK_EXTERNAL_RECIPES)) {
       if (q.includes(keyword) || keyword.includes(q)) {
         for (const raw of recipes) {
-          // Run through normalizer pipeline
           const normalized = normalizeExternalRecipe(raw);
           results.push({
             ...normalized,
@@ -732,6 +828,12 @@ app.get('/api/external-search', async (req, res) => {
       }
     }
 
+    // If no hardcoded match, generate smart dynamic fallback
+    if (results.length === 0) {
+      const dynamic = generateDynamicFallback(q);
+      results.push(...dynamic);
+    }
+
     res.json(results);
   } catch (error) {
     console.error('External search error:', error);
@@ -739,12 +841,23 @@ app.get('/api/external-search', async (req, res) => {
   }
 });
 
+// ─── Admin Protected Routes ─────────────────────────────────
+app.use('/api/admin', requireAdmin);
+
 // ─── Admin: List recipes pending review ───────────────────
-app.get('/api/admin/reviews', async (req, res) => {
+app.get('/api/admin/recipes/review', async (req, res) => {
   try {
-    const status = req.query.status || 'cached_unverified';
+    const status = req.query.status;
+    
+    let whereClause = {};
+    if (status) {
+      whereClause = { status: String(status) };
+    } else {
+      whereClause = { status: { in: ['scraped', 'cached_unverified'] } };
+    }
+
     const recipes = await prisma.recipe.findMany({
-      where: { status: String(status) },
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
       take: 100,
     });
@@ -769,6 +882,20 @@ app.get('/api/admin/stats', async (req, res) => {
   } catch (error) {
     console.error('Admin stats error:', error);
     res.status(500).json({ error: 'Failed to get stats' });
+  }
+});
+
+// ─── Admin: Get recipe detail ─────────────────────────────
+app.get('/api/admin/recipes/:id', async (req, res) => {
+  try {
+    const recipe = await prisma.recipe.findUnique({
+      where: { id: req.params.id },
+    });
+    if (!recipe) return res.status(404).json({ error: 'Recipe not found' });
+    res.json(formatRecipe(recipe));
+  } catch (error) {
+    console.error('Admin get recipe error:', error);
+    res.status(500).json({ error: 'Failed to fetch recipe' });
   }
 });
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { SearchBar } from './components/SearchBar';
 import { RecipeList } from './components/RecipeList';
 import { RecipePreviewModal } from './components/RecipePreviewModal';
@@ -26,18 +26,17 @@ import './App.css';
 
 function HomeView() {
   const auth = useAuth();
-  const navigate = useNavigate();
 
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [aiRecipes, setAiRecipes] = useState<AiRecipe[]>([]);
 
   // localStorage fallback for guests
-  const [guestLikes, setGuestLikes] = useState<string[]>(() => {
+  const [guestLikes, _setGuestLikes] = useState<string[]>(() => {
     const saved = localStorage.getItem('racikin_likes');
     return saved ? JSON.parse(saved) : [];
   });
-  const [guestBookmarks, setGuestBookmarks] = useState<string[]>(() => {
+  const [guestBookmarks, _setGuestBookmarks] = useState<string[]>(() => {
     const saved = localStorage.getItem('racikin_bookmarks');
     return saved ? JSON.parse(saved) : [];
   });
@@ -45,6 +44,7 @@ function HomeView() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchStatus, setSearchStatus] = useState<'idle' | 'searching_internal' | 'searching_external' | 'done'>('idle');
 
   const [selectedRecipeForPreview, setSelectedRecipeForPreview] = useState<Recipe | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -132,6 +132,7 @@ function HomeView() {
 
     if (!query.trim()) {
       setHasSearched(false);
+      setSearchStatus('idle');
       setIsLoading(true);
       try { const data = await getLatestRecipes(); setRecipes(data); } catch {}
       setIsLoading(false);
@@ -139,21 +140,37 @@ function HomeView() {
     }
 
     setHasSearched(true);
+    setSearchStatus('searching_internal');
     setIsLoading(true);
+
     try {
+      // Step 1: Internal search
       const internal = await searchRecipes(query);
-      const external = await searchExternalRecipes(query);
-      const blended: Recipe[] = [];
-      let extIdx = 0;
-      for (let i = 0; i < internal.length; i++) {
-        blended.push(internal[i]);
-        if ((i + 1) % 5 === 0 && extIdx < external.length) {
-          blended.push(external[extIdx++]);
-        }
+
+      // If internal has enough results (>= 5), show immediately
+      if (internal.length >= 5) {
+        setRecipes(internal);
+        setSearchStatus('done');
+        setIsLoading(false);
+        return;
       }
-      while (extIdx < external.length) blended.push(external[extIdx++]);
+
+      // Step 2: Not enough internal results - show what we have + search external
+      setRecipes(internal);
+      setSearchStatus('searching_external');
+
+      const external = await searchExternalRecipes(query);
+
+      // Blend results: internal first, then external interleaved
+      const blended: Recipe[] = [...internal];
+      for (const ext of external) {
+        blended.push(ext);
+      }
+
       setRecipes(blended);
+      setSearchStatus('done');
     } catch {
+      setSearchStatus('done');
       setRecipes([]);
     } finally {
       setIsLoading(false);
@@ -164,6 +181,7 @@ function HomeView() {
     setActiveTab('explore');
     setSelectedCategory(category);
     setSearchQuery('');
+    setSearchStatus('idle');
 
     if (!category || category === 'Semua') {
       setHasSearched(false);
@@ -181,6 +199,7 @@ function HomeView() {
 
   const handlePopularTab = useCallback(async () => {
     setActiveTab('popular');
+    setSearchStatus('idle');
     setIsLoading(true);
     try { const data = await getPopularRecipes(); setRecipes(data); } catch {}
     setIsLoading(false);
@@ -191,6 +210,7 @@ function HomeView() {
     setHasSearched(false);
     setSelectedCategory(null);
     setSearchQuery('');
+    setSearchStatus('idle');
     setIsLoading(true);
     try { const data = await getLatestRecipes(); setRecipes(data); } catch {}
     setIsLoading(false);
@@ -315,6 +335,7 @@ function HomeView() {
               onToggleSave={handleToggleBookmark}
               likedRecipes={likedRecipeIds}
               onToggleLike={handleToggleLike}
+              searchStatus={searchStatus}
             />
           </>
         )}
@@ -376,14 +397,41 @@ function HomeView() {
   );
 }
 
+import { Footer } from './components/Footer';
+import { AdminDashboard } from './components/AdminDashboard';
+
+function AppRoutes() {
+  const auth = useAuth();
+  
+  if (auth.isLoading) {
+    return (
+      <div className="app-shell" style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Memuat sesi...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="app-shell">
+      <main className="main-content">
+        <div className="content-container">
+          <Routes>
+            <Route path="/" element={<HomeView />} />
+            <Route path="/resep/:slug" element={<RecipeFullPage />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Routes>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<HomeView />} />
-          <Route path="/resep/:slug" element={<RecipeFullPage />} />
-        </Routes>
+        <AppRoutes />
       </BrowserRouter>
     </AuthProvider>
   );

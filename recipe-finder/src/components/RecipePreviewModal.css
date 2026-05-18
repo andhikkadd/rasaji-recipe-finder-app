@@ -129,32 +129,45 @@
 }
 
 .preview-more-text {
-  font-style: italic;
-  color: var(--accent-color);
+  font-style: normal;
+  font-weight: 600;
+  color: #334155; /* slate-700 */
   list-style: none;
   margin-left: -1.25rem;
   margin-top: 0.5rem;
-  font-weight: 500;
+  cursor: pointer;
+  display: inline-block;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: color 0.2s, text-decoration-color 0.2s;
+}
+
+.preview-more-text:hover {
+  color: #0f172a; /* slate-900 */
+  text-decoration-color: currentColor;
 }
 
 .primary-cta-btn {
-  background: var(--accent-color);
+  background: #1e293b; /* slate-800 */
   color: white;
   border: none;
   padding: 1rem;
-  border-radius: 100px;
+  border-radius: 16px;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
   text-align: center;
   width: 100%;
   margin-top: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .primary-cta-btn:hover {
-  background: #dc2626;
+  background: #0f172a; /* slate-900 */
   transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 .animate-fade-in {

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import type { Recipe } from '../types';
 import { getRecipeImage } from '../utils/imageUtils';
@@ -37,11 +37,11 @@ export function RecipeFullPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<'login' | 'register'>('login');
 
-  const [guestLikes, setGuestLikes] = useState<string[]>(() => {
+  const [guestLikes, _setGuestLikes] = useState<string[]>(() => {
     const saved = localStorage.getItem('racikin_likes');
     return saved ? JSON.parse(saved) : [];
   });
-  const [guestBookmarks, setGuestBookmarks] = useState<string[]>(() => {
+  const [guestBookmarks, _setGuestBookmarks] = useState<string[]>(() => {
     const saved = localStorage.getItem('racikin_bookmarks');
     return saved ? JSON.parse(saved) : [];
   });
@@ -236,11 +236,9 @@ export function RecipeFullPage() {
               <h2 className="prep-title">Bahan-bahan</h2>
               <ul className="prep-list ingredients-list">
                 {recipe.ingredients.map((ing, i) => (
-                  <li key={i}>
-                    <label className="prep-item-label">
-                      <input type="checkbox" className="prep-checkbox" />
-                      <span className="prep-text">{ing}</span>
-                    </label>
+                  <li key={i} className="prep-item">
+                    <span className="prep-bullet">•</span>
+                    <span className="prep-text">{ing}</span>
                   </li>
                 ))}
               </ul>
@@ -251,11 +249,9 @@ export function RecipeFullPage() {
                 <h2 className="prep-title">Alat yang Dibutuhkan</h2>
                 <ul className="prep-list tools-list">
                   {recipe.tools.map((t, i) => (
-                    <li key={i}>
-                      <label className="prep-item-label">
-                        <input type="checkbox" className="prep-checkbox" />
-                        <span className="prep-text">{t}</span>
-                      </label>
+                    <li key={i} className="prep-item">
+                      <span className="prep-bullet">•</span>
+                      <span className="prep-text">{t}</span>
                     </li>
                   ))}
                 </ul>
@@ -266,11 +262,11 @@ export function RecipeFullPage() {
           {/* 3. Main Content: Cooking Flow */}
           <main className="cooking-main">
             <section className="steps-section">
-              <h2 className="section-title">Langkah Memasak</h2>
+              <h2 className="section-title">Langkah-langkah</h2>
               <div className="steps-container">
                 {steps.map((step, i) => (
                   <div className="step-card" key={i}>
-                    <div className="step-number">{i + 1}</div>
+                    <div className="step-number">{(i + 1).toString().padStart(2, '0')}</div>
                     <div className="step-content">
                       <p>{step}</p>
                     </div>

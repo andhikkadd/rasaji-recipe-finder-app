@@ -1,3 +1,4 @@
+import { normalizeRecipe } from '../utils/recipeNormalizer';
 import type { Recipe, SearchFilters } from '../types';
 
 const API = '/api';
@@ -18,7 +19,7 @@ function dedup(title: string): string {
 
 // ─── Normalize API response ──────────────────────────────
 function normalize(raw: any): Recipe {
-  return {
+  const baseRecipe: Recipe = {
     id: raw.id,
     slug: raw.slug || raw.id,
     title: dedup(raw.title || 'Tanpa Judul'),
@@ -49,6 +50,8 @@ function normalize(raw: any): Recipe {
     views: raw.views || 0,
     _isExternalMock: raw._isExternalMock || false,
   };
+  
+  return normalizeRecipe(baseRecipe);
 }
 
 function buildDesc(raw: any): string {
@@ -111,6 +114,7 @@ export async function toggleLike(recipeId: string, action: 'like' | 'unlike'): P
   const res = await fetch(`${API}/recipes/${recipeId}/like`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({ action }),
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -122,6 +126,7 @@ export async function toggleBookmark(recipeId: string, action: 'bookmark' | 'unb
   const res = await fetch(`${API}/recipes/${recipeId}/bookmark`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({ action }),
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);

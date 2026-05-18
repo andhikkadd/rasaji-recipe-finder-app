@@ -61,7 +61,15 @@ export function RecipePreviewModal({ recipe, onClose }: RecipePreviewModalProps)
                   <li key={i}>{ing}</li>
                 ))}
                 {remainingIng > 0 && (
-                  <li className="preview-more-text">+{remainingIng} bahan lainnya</li>
+                  <li 
+                    className="preview-more-text" 
+                    onClick={handleReadFull}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Baca semua ${totalIng} bahan di resep lengkap`}
+                  >
+                    Lihat {remainingIng} bahan lainnya
+                  </li>
                 )}
               </ul>
             </div>
@@ -73,7 +81,15 @@ export function RecipePreviewModal({ recipe, onClose }: RecipePreviewModalProps)
                   <li key={i}>{step}</li>
                 ))}
                 {remainingSteps > 0 && (
-                  <li className="preview-more-text">+{remainingSteps} langkah lainnya</li>
+                  <li 
+                    className="preview-more-text" 
+                    onClick={handleReadFull}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Baca semua ${totalSteps} langkah di resep lengkap`}
+                  >
+                    Lihat {remainingSteps} langkah lainnya
+                  </li>
                 )}
               </ol>
             </div>
