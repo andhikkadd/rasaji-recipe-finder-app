@@ -113,3 +113,11 @@ button {
   background: none;
   transition: all 0.2s ease;
 }
+
+/* Utilities */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+}

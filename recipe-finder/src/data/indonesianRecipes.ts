@@ -4,6 +4,12 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   // --- AYAM (CHICKEN) ---
   {
     id: "r1",
+    slug: "ayam-goreng-lengkuas-rempah",
+    sourceType: "internal",
+    status: "verified",
+    isVerified: true,
+    bookmarks: 0,
+    views: 0,
     title: "Ayam Goreng Lengkuas Rempah",
     category: "Ayam",
     shortDescription: "Ayam goreng klasik dengan taburan serundeng lengkuas yang super gurih dan melimpah. Rahasia makan nambah nasi!",
@@ -36,6 +42,12 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   },
   {
     id: "r2",
+    slug: "ayam-rica-rica-khas-manado",
+    sourceType: "internal",
+    status: "verified",
+    isVerified: true,
+    bookmarks: 0,
+    views: 0,
     title: "Ayam Rica-Rica Khas Manado",
     category: "Ayam",
     shortDescription: "Pedas, wangi, dan menggugah selera! Potongan ayam yang dimasak dengan bumbu tumbuk kasar dan daun kemangi yang harum.",
@@ -69,6 +81,12 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   // --- TELUR (EGG) ---
   {
     id: "r3",
+    slug: "telur-bumbu-balado-merah",
+    sourceType: "internal",
+    status: "verified",
+    isVerified: true,
+    bookmarks: 0,
+    views: 0,
     title: "Telur Bumbu Balado Merah",
     category: "Telur",
     shortDescription: "Sajian praktis favorit keluarga. Telur rebus goreng dengan balutan bumbu balado merah yang pedas manis.",
@@ -99,6 +117,12 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   },
   {
     id: "r4",
+    slug: "fuyunghai-ala-warteg-telur-dadar-sayur-",
+    sourceType: "internal",
+    status: "verified",
+    isVerified: true,
+    bookmarks: 0,
+    views: 0,
     title: "Fuyunghai ala Warteg (Telur Dadar Sayur)",
     category: "Telur",
     shortDescription: "Omelet tebal gaya lokal yang renyah di luar, empuk di dalam, disiram saus asam manis gurih.",
@@ -133,6 +157,12 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   // --- DAGING (MEAT) ---
   {
     id: "r5",
+    slug: "rendang-daging-sapi-padang-asli",
+    sourceType: "internal",
+    status: "verified",
+    isVerified: true,
+    bookmarks: 0,
+    views: 0,
     title: "Rendang Daging Sapi Padang Asli",
     category: "Daging",
     shortDescription: "Raja makanan dunia! Daging sapi yang dimasak perlahan dalam santan dan rempah hingga menghitam, empuk, dan kaya rasa.",
@@ -165,6 +195,12 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   },
   {
     id: "r6",
+    slug: "sengkel-sapi-bumbu-lada-hitam",
+    sourceType: "internal",
+    status: "verified",
+    isVerified: true,
+    bookmarks: 0,
+    views: 0,
     title: "Sengkel Sapi Bumbu Lada Hitam",
     category: "Daging",
     shortDescription: "Irisan daging sengkel yang super empuk berlapis saus lada hitam kental yang pedas menghangatkan tenggorokan.",
@@ -198,6 +234,12 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   // --- SAYUR (VEGETABLES) ---
   {
     id: "r7",
+    slug: "tumis-kangkung-terasi-belacan",
+    sourceType: "internal",
+    status: "verified",
+    isVerified: true,
+    bookmarks: 0,
+    views: 0,
     title: "Tumis Kangkung Terasi Belacan",
     category: "Sayur",
     shortDescription: "Sayur kangkung hijau segar yang ditumis kilat dengan api besar, berpadu dengan aroma terasi bakar yang menggoda.",
@@ -229,6 +271,12 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   },
   {
     id: "r8",
+    slug: "sayur-lodeh-labu-siam-buncis",
+    sourceType: "internal",
+    status: "verified",
+    isVerified: true,
+    bookmarks: 0,
+    views: 0,
     title: "Sayur Lodeh Labu Siam Buncis",
     category: "Sayur",
     shortDescription: "Sayur lodeh rumahan dengan kuah santan kuning yang ringan, gurih, dan nyaman di perut.",
@@ -263,6 +311,12 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   // --- TAHU & TEMPE ---
   {
     id: "r9",
+    slug: "tahu-crispy-cabe-garam",
+    sourceType: "internal",
+    status: "verified",
+    isVerified: true,
+    bookmarks: 0,
+    views: 0,
     title: "Tahu Crispy Cabe Garam",
     category: "Tahu & Tempe",
     shortDescription: "Camilan atau lauk yang bikin ketagihan! Potongan tahu sutra berbalut tepung renyah, ditumis dengan tumpukan bawang putih dan cabe.",
@@ -294,6 +348,12 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   },
   {
     id: "r10",
+    slug: "tempe-mendoan-purwokerto-asli",
+    sourceType: "internal",
+    status: "verified",
+    isVerified: true,
+    bookmarks: 0,
+    views: 0,
     title: "Tempe Mendoan Purwokerto Asli",
     category: "Tahu & Tempe",
     shortDescription: "Gorengan tempe lebar berbalut adonan tepung basah dan irisan daun bawang. Digoreng setengah matang (mendo) sehingga lemes dan gurih.",
@@ -327,6 +387,12 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   // --- NASI & MIE ---
   {
     id: "r11",
+    slug: "nasi-liwet-sunda-magic-com",
+    sourceType: "internal",
+    status: "verified",
+    isVerified: true,
+    bookmarks: 0,
+    views: 0,
     title: "Nasi Liwet Sunda Magic Com",
     category: "Nasi",
     shortDescription: "Cara paling modern membuat nasi liwet tradisional! Nasi gurih beraroma rempah dan ikan asin yang dimasak langsung di rice cooker.",
@@ -358,6 +424,12 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   },
   {
     id: "r12",
+    slug: "mie-nyemek-pedas-abang-abang",
+    sourceType: "internal",
+    status: "verified",
+    isVerified: true,
+    bookmarks: 0,
+    views: 0,
     title: "Mie Nyemek Pedas Abang-Abang",
     category: "Mie",
     shortDescription: "Mie rebus tapi kuahnya kental dan sedikit (nyemek). Dimasak dengan bumbu ulek yang nendang dan topping sayur melimpah.",
@@ -391,6 +463,12 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   // --- IKAN (FISH) ---
   {
     id: "r13",
+    slug: "ikan-nila-bakar-bumbu-kecap",
+    sourceType: "internal",
+    status: "verified",
+    isVerified: true,
+    bookmarks: 0,
+    views: 0,
     title: "Ikan Nila Bakar Bumbu Kecap",
     category: "Ikan",
     shortDescription: "Ikan bakar manis gurih ala restoran seafood. Daging ikannya lembut, bumbu kecap meresap sampai ke tulang.",
@@ -423,6 +501,12 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   // --- SAMBAL ---
   {
     id: "r14",
+    slug: "sambal-matah-bali-asli",
+    sourceType: "internal",
+    status: "verified",
+    isVerified: true,
+    bookmarks: 0,
+    views: 0,
     title: "Sambal Matah Bali Asli",
     category: "Sambal",
     shortDescription: "Sambal mentah khas Bali yang sangat wangi, segar, dan meledak di mulut. Jodoh terbaik untuk ikan bakar atau ayam goreng.",
@@ -457,6 +541,12 @@ export const INDONESIAN_RECIPES: Recipe[] = [
   // --- MINUMAN (DRINKS) ---
   {
     id: "r15",
+    slug: "es-cendol-dawet-gula-aren",
+    sourceType: "internal",
+    status: "verified",
+    isVerified: true,
+    bookmarks: 0,
+    views: 0,
     title: "Es Cendol Dawet Gula Aren",
     category: "Minuman",
     shortDescription: "Minuman dingin tradisional pelepas dahaga. Butiran cendol hijau kenyal yang berenang di kuah santan dan lelehan gula aren legit.",

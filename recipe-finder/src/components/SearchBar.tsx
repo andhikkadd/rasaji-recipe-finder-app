@@ -5,9 +5,10 @@ interface SearchBarProps {
   onSearch: (query: string) => void;
   isLoading: boolean;
   initialValue?: string;
+  placeholder?: string;
 }
 
-export function SearchBar({ onSearch, isLoading, initialValue = '' }: SearchBarProps) {
+export function SearchBar({ onSearch, isLoading, initialValue = '', placeholder = "Cari resep, misal: ayam geprek, nasi goreng, mie..." }: SearchBarProps) {
   const [value, setValue] = useState(initialValue);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const isFirstRender = useRef(true);
@@ -56,7 +57,7 @@ export function SearchBar({ onSearch, isLoading, initialValue = '' }: SearchBarP
           type="text"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder="Cari resep, misal: ayam geprek, nasi goreng, mie..."
+          placeholder={placeholder}
           className="search-input"
           autoComplete="off"
           id="search-input"

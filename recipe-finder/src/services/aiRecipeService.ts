@@ -1,10 +1,25 @@
 import type { Recipe, AiRecipe, AiAssistantResponse } from '../types';
 
+// ─── AI Provider Config ──────────────────────────────────
+// Set this to 'gemini' and provide GEMINI_API_KEY in .env
+// to switch from mock to real AI responses.
+const AI_PROVIDER: 'mock' | 'gemini' = 'mock';
+const GEMINI_API_KEY = ''; // Will be set via env in production
+
 // ─── AI Recipe Generator (mock) ──────────────────────────
 export async function generateRecipeIdeasFromIngredients(
   ingredients: string[],
   _preference: string | null
 ): Promise<AiRecipe[]> {
+  if (AI_PROVIDER === 'gemini' && GEMINI_API_KEY) {
+    // Future: Call Gemini API
+    // const prompt = `Given these ingredients: ${ingredients.join(', ')},
+    //   suggest 2-3 Indonesian recipes. Return JSON array with fields:
+    //   name, description, ingredientsUsed, missingIngredients, time, difficulty, steps`;
+    // const response = await callGemini(prompt);
+    // return JSON.parse(response);
+  }
+
   await new Promise(resolve => setTimeout(resolve, 2000));
 
   return [
@@ -43,13 +58,36 @@ export async function generateRecipeIdeasFromIngredients(
   ];
 }
 
-// ─── AI Recipe Normalizer (mock) ──────────────────────────
+// ─── AI Recipe Normalizer ─────────────────────────────────
 /**
  * Normalizes messy external recipe data into Racikin's clean format.
- * In the future, this will call an LLM to clean up ingredients, steps, etc.
+ *
+ * Current: Basic string cleanup (mock).
+ * Future:  Calls Gemini API to intelligently normalize ingredients
+ *          (e.g., "2 bawang merah yg sdh dikupas" → "2 bawang merah (kupas)")
+ *          and standardize step formatting.
+ *
+ * Integration point for Gemini:
+ *   const prompt = `You are a recipe data normalizer for an Indonesian recipe platform.
+ *     Clean up this recipe data into a standardized JSON format:
+ *     ${JSON.stringify(rawRecipe)}
+ *     Rules:
+ *     - Fix ingredient formatting: quantity + unit + item name
+ *     - Split compound steps into individual steps
+ *     - Infer category from title and ingredients
+ *     - Generate 3-5 relevant keywords
+ *     - Estimate cooking time if missing
+ *     Return valid JSON matching this schema: { title, ingredients[], steps[], ... }`;
+ *   const response = await callGemini(prompt);
+ *   return JSON.parse(response);
  */
 export async function normalizeExternalRecipe(rawRecipe: Partial<Recipe>): Promise<Partial<Recipe>> {
-  // Mock: just return the recipe with some cleanup
+  if (AI_PROVIDER === 'gemini' && GEMINI_API_KEY) {
+    // Future: Call Gemini API for intelligent normalization
+    // return await callGeminiNormalizer(rawRecipe);
+  }
+
+  // Mock: Basic cleanup
   await new Promise(r => setTimeout(r, 200));
 
   return {
@@ -63,38 +101,66 @@ export async function normalizeExternalRecipe(rawRecipe: Partial<Recipe>): Promi
   };
 }
 
-// ─── AI Recipe Assistant (mock Q&A) ──────────────────────
+// ─── AI Recipe Assistant (Single Q&A) ────────────────────
 /**
  * Answers a question about a specific recipe.
- * Returns a single answer string. Designed to be upgraded to a chat thread later.
+ * Returns a single Q&A pair — designed to be upgraded to chat later.
+ *
+ * Integration point for Gemini:
+ *   const prompt = `You are "Racikin AI", a friendly Indonesian cooking assistant.
+ *     The user is looking at this recipe: "${recipe.title}"
+ *     Ingredients: ${recipe.ingredients.join(', ')}
+ *     Steps: ${recipe.steps.join('. ')}
+ *
+ *     User question: "${question}"
+ *
+ *     Answer in Bahasa Indonesia, casual and friendly.
+ *     Use food emojis. Keep it concise (2-3 sentences max).`;
+ *   const response = await callGemini(prompt);
+ *   return { question, answer: response };
  */
 
-const MOCK_ANSWERS: Record<string, string> = {
-  'bawang bombay': '🧅 Bawang bombay bisa diganti dengan bawang merah iris tipis (2x lipat takaran). Rasanya akan sedikit berbeda tapi tetap enak! Kalau mau lebih mirip, gunakan daun bawang putih bagian batangnya.',
-  'anak kos': '🎓 Versi anak kos: Kurangi bahan jadi setengah, ganti santan dengan susu UHT + sedikit tepung maizena, dan gunakan bumbu instan sebagai basis. Masak pakai wajan anti lengket biasa.',
-  'hemat': '💰 Tips hemat: Ganti protein utama dengan tempe/tahu, kurangi bumbu premium, dan gunakan bumbu dasar siap pakai. Estimasi biaya bisa turun 40-60%.',
-  'sehat': '🥗 Versi sehat: Kurangi minyak goreng (tumis tanpa minyak pakai teflon), ganti gula dengan madu, tambah sayuran segar, dan kurangi garam. Gunakan metode kukus/panggang bukan goreng.',
-  'pedas': '🌶️ Tambahkan 5-10 cabe rawit utuh atau cabe rawit iris saat menumis bumbu. Untuk pedas yang lebih meledak, tambahkan 1 sdm sambal oelek atau bubuk cabe Korea (gochugaru).',
-  'santan': '🥥 Pengganti santan: Gunakan susu evaporasi, susu oat, atau santan kelentik instan. Untuk rasa gurih tanpa santan, tambahkan 1 sdm krim keju atau mentega.',
-  'default': '🤖 Hmm, pertanyaan yang menarik! Untuk saat ini saya belum bisa memberikan jawaban spesifik untuk pertanyaan ini. Tim Racikin sedang mengembangkan AI yang lebih pintar. Coba tanyakan tentang pengganti bahan, versi hemat, versi sehat, atau cara membuat lebih pedas!'
-};
-
 export async function askRecipeAssistant(
-  _recipe: Recipe,
+  recipe: Recipe,
   question: string
 ): Promise<AiAssistantResponse> {
-  // Simulate AI thinking time
-  await new Promise(r => setTimeout(r, 1500));
-
-  const q = question.toLowerCase();
-
-  let answer = MOCK_ANSWERS.default;
-  for (const [keyword, response] of Object.entries(MOCK_ANSWERS)) {
-    if (keyword !== 'default' && q.includes(keyword)) {
-      answer = response;
-      break;
-    }
+  const res = await fetch('/api/ai/ask-recipe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      recipeId: recipe.id,
+      question,
+      recipeContext: {
+        title: recipe.title,
+        ingredients: recipe.ingredients,
+        tools: recipe.tools,
+        steps: recipe.steps,
+        tips: recipe.tips
+      }
+    })
+  });
+  
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || 'Failed to get AI response');
   }
-
-  return { question, answer };
+  
+  return data;
 }
+
+// ─── Gemini API Helper (future) ──────────────────────────
+// async function callGemini(prompt: string): Promise<string> {
+//   const response = await fetch(
+//     `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+//     {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({
+//         contents: [{ parts: [{ text: prompt }] }],
+//         generationConfig: { temperature: 0.7, maxOutputTokens: 1024 },
+//       }),
+//     }
+//   );
+//   const data = await response.json();
+//   return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+// }
