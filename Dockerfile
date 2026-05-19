@@ -26,8 +26,5 @@ ENV NODE_ENV=production
 
 EXPOSE 8080
 
-# Chained container startup command:
-# 1. npx prisma db push - Creates/migrates database tables safely
-# 2. node scripts/seed.js - Seeds initial verified Indonesian recipes idempotently
-# 3. node server.js - Launches the full-stack server
-CMD ["sh", "-c", "npx prisma db push && node scripts/seed.js && node server.js"]
+# Start the server directly
+CMD ["node", "server.js"]

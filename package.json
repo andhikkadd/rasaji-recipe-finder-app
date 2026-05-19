@@ -8,7 +8,10 @@
     "start": "node server.js",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:push": "npx prisma db push",
+    "db:seed": "node scripts/seed.js",
+    "db:setup": "npx prisma db push && node scripts/seed.js"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
