@@ -1,4 +1,4 @@
-# Rasaji 🍳
+# Rasaji 1.0🍳
 
 Rasaji is a modern, minimalist Indonesian recipe finder and cooking assistant. Discover daily meal ideas, filter recipes by category, bookmark your favorite dishes, and utilize a smart AI assistant to brainstorm recipe ideas from ingredients you already have at home.
 
