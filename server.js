@@ -14,6 +14,31 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const prisma = new PrismaClient({});
 
+// ─── Startup Logging & Uncaught Exception Handlers ─────────
+const dbUrl = process.env.DATABASE_URL;
+if (dbUrl) {
+  const masked = dbUrl.replace(/:([^:@]+)@/, ':******@');
+  console.log(`DATABASE_URL is configured: ${masked}`);
+} else {
+  console.log('DATABASE_URL is not set. Defaulting to local SQLite database.');
+}
+
+process.on('uncaughtException', (err) => {
+  console.error('CRITICAL UNCAUGHT EXCEPTION:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('CRITICAL UNHANDLED REJECTION at:', promise, 'reason:', reason);
+});
+
+// ─── Request Logger Middleware ────────────────────────────
+app.use((req, res, next) => {
+  console.log(`[HTTP] ${req.method} ${req.path}`);
+  res.on('finish', () => {
+    console.log(`[HTTP] ${req.method} ${req.path} -> Status: ${res.statusCode}`);
+  });
+  next();
+});
+
 const distPath = path.join(__dirname, 'dist');
 
 app.use(express.json());

@@ -30,6 +30,7 @@ COPY --from=builder /app/package.json ./package.json
 # Expose port and configure production defaults
 ENV PORT=8080
 ENV NODE_ENV=production
+ENV DATABASE_URL="file:/app/prisma/dev.db"
 
 EXPOSE 8080
 
