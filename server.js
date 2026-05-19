@@ -14,7 +14,10 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const prisma = new PrismaClient({});
 
+const distPath = path.join(__dirname, 'dist');
+
 app.use(express.json());
+app.use(express.static(distPath));
 
 // ─── Session middleware ───────────────────────────────────
 app.use(session({
@@ -1139,16 +1142,18 @@ app.get('/api/recipes', async (req, res) => {
   }
 });
 
-// ─── Static files & SPA fallback ──────────────────────────
-const distPath = path.join(__dirname, 'dist');
-app.use(express.static(distPath));
-
+// ─── SPA fallback ─────────────────────────────────────────
 app.use((req, res) => {
   if (req.path.startsWith('/api')) {
-    res.status(404).json({ error: 'API route not found' });
-  } else {
-    res.sendFile(path.join(distPath, 'index.html'));
+    return res.status(404).json({ error: 'API route not found' });
   }
+
+  // Return 404 for missing static assets instead of serving index.html
+  if (req.path.startsWith('/assets/') || req.path === '/favicon.svg' || req.path === '/site.webmanifest') {
+    return res.status(404).send('Not Found');
+  }
+
+  res.sendFile(path.join(distPath, 'index.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
