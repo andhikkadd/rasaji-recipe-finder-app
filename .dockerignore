@@ -4,3 +4,4 @@ dist
 .git
 .gitignore
 README.md
+.agents
