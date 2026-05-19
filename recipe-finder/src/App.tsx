@@ -289,11 +289,25 @@ function HomeView() {
     <>
       <header className="app-header">
         <div className="logo-container" onClick={resetToExplore}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="logo-icon">
-            <path d="M12 2v20"></path>
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          <svg className="brand-logo-mark" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+            {/* Custom R with mixing-motion curved leg */}
+            <path
+              d="M10 6 L10 30 M10 6 L20 6 Q27 6 27 13 Q27 19 20 19.5 L10 19.5 M16 19.5 Q20 22 24 30"
+              fill="none"
+              stroke="#172033"
+              strokeWidth="3.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            {/* Small green leaf accent */}
+            <path
+              d="M26 4 Q30 2 31 6 Q29 8 26 7 Q25 5.5 26 4Z"
+              fill="#10b981"
+            />
+            {/* Warm seasoning dot */}
+            <circle cx="28.5" cy="9.5" r="1.2" fill="#f59e0b" opacity="0.75" />
           </svg>
-          <h1 className="logo-text">Raci<span className="text-accent">kin</span></h1>
+          <h1 className="logo-text">Racik<span className="text-accent">in</span></h1>
         </div>
 
         <div className="nav-tabs">
