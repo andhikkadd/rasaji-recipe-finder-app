@@ -13,6 +13,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { generateRecipeIdeasFromIngredients } from './services/aiRecipeService';
 import {
   searchRecipes,
+  searchExpandedRecipes,
   getLatestRecipes,
   getPopularRecipes,
   getRecipesByCategory,
@@ -21,6 +22,8 @@ import {
   cacheExternalRecipe,
 } from './services/recipeApi';
 import { searchExternalRecipes } from './services/externalSearchService';
+import { Footer } from './components/Footer';
+import { AdminDashboard } from './components/AdminDashboard.tsx';
 import type { Recipe, AiRecipe } from './types';
 import './App.css';
 
@@ -32,11 +35,11 @@ function HomeView() {
   const [aiRecipes, setAiRecipes] = useState<AiRecipe[]>([]);
 
   // localStorage fallback for guests
-  const [guestLikes, _setGuestLikes] = useState<string[]>(() => {
+  const [guestLikes] = useState<string[]>(() => {
     const saved = localStorage.getItem('racikin_likes');
     return saved ? JSON.parse(saved) : [];
   });
-  const [guestBookmarks, _setGuestBookmarks] = useState<string[]>(() => {
+  const [guestBookmarks] = useState<string[]>(() => {
     const saved = localStorage.getItem('racikin_bookmarks');
     return saved ? JSON.parse(saved) : [];
   });
@@ -44,7 +47,10 @@ function HomeView() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchStatus, setSearchStatus] = useState<'idle' | 'searching_internal' | 'searching_external' | 'done'>('idle');
+  const [searchStatus, setSearchStatus] = useState<'idle' | 'searching_internal' | 'expanding_query' | 'searching_external' | 'done'>('idle');
+  const [nonFoodQuery, setNonFoodQuery] = useState(false);
+
+
 
   const [selectedRecipeForPreview, setSelectedRecipeForPreview] = useState<Recipe | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -73,7 +79,7 @@ function HomeView() {
   useEffect(() => {
     localStorage.setItem('racikin_likes', JSON.stringify(guestLikes));
   }, [guestLikes]);
-  
+
   useEffect(() => {
     localStorage.setItem('racikin_bookmarks', JSON.stringify(guestBookmarks));
   }, [guestBookmarks]);
@@ -134,7 +140,7 @@ function HomeView() {
       setHasSearched(false);
       setSearchStatus('idle');
       setIsLoading(true);
-      try { const data = await getLatestRecipes(); setRecipes(data); } catch {}
+      try { const data = await getLatestRecipes(); setRecipes(data); } catch (err) { console.error('Gagal mengambil resep terbaru:', err); }
       setIsLoading(false);
       return;
     }
@@ -142,6 +148,7 @@ function HomeView() {
     setHasSearched(true);
     setSearchStatus('searching_internal');
     setIsLoading(true);
+    setNonFoodQuery(false);
 
     try {
       // Step 1: Internal search
@@ -155,19 +162,57 @@ function HomeView() {
         return;
       }
 
-      // Step 2: Not enough internal results - show what we have + search external
       setRecipes(internal);
-      setSearchStatus('searching_external');
 
-      const external = await searchExternalRecipes(query);
+      // Step 2: Expand Kitchen Query
+      setSearchStatus('expanding_query');
+      const { recipes: expandedInternal, foodIntent: expandIntent } = await searchExpandedRecipes(query);
 
-      // Blend results: internal first, then external interleaved
-      const blended: Recipe[] = [...internal];
-      for (const ext of external) {
-        blended.push(ext);
+      // Server says this query is not food-related
+      if (expandIntent === false) {
+        setNonFoodQuery(true);
+        setRecipes(internal); // keep any internal results (likely 0)
+        setSearchStatus('done');
+        return;
       }
 
-      setRecipes(blended);
+      // Dedup internal and expanded
+      const internalSlugs = new Set(internal.map(r => r.slug));
+      const internalTitles = new Set(internal.map(r => r.title.toLowerCase().trim()));
+      
+      const uniqueExpanded = expandedInternal.filter(
+        r => !internalSlugs.has(r.slug) && !internalTitles.has(r.title.toLowerCase().trim())
+      );
+      
+      const combinedInternal = [...internal, ...uniqueExpanded];
+      setRecipes(combinedInternal);
+
+      if (combinedInternal.length >= 5) {
+        setSearchStatus('done');
+        setIsLoading(false);
+        return;
+      }
+
+      // Step 3: Not enough expanded internal results — show what we have + search external
+      setSearchStatus('searching_external');
+
+      const { recipes: external, foodIntent } = await searchExternalRecipes(query);
+
+      if (foodIntent === false) {
+        setNonFoodQuery(true);
+        setSearchStatus('done');
+        return;
+      }
+
+      // Dedup external against combinedInternal
+      const combinedSlugs = new Set(combinedInternal.map(r => r.slug));
+      const combinedTitles = new Set(combinedInternal.map(r => r.title.toLowerCase().trim()));
+      
+      const uniqueExternal = external.filter(
+        ext => !combinedSlugs.has(ext.slug) && !combinedTitles.has(ext.title.toLowerCase().trim())
+      );
+
+      setRecipes([...combinedInternal, ...uniqueExternal]);
       setSearchStatus('done');
     } catch {
       setSearchStatus('done');
@@ -186,14 +231,14 @@ function HomeView() {
     if (!category || category === 'Semua') {
       setHasSearched(false);
       setIsLoading(true);
-      try { const data = await getLatestRecipes(); setRecipes(data); } catch {}
+      try { const data = await getLatestRecipes(); setRecipes(data); } catch (err) { console.error('Gagal mengambil resep terbaru:', err); }
       setIsLoading(false);
       return;
     }
 
     setHasSearched(true);
     setIsLoading(true);
-    try { const data = await getRecipesByCategory(category); setRecipes(data); } catch {}
+    try { const data = await getRecipesByCategory(category); setRecipes(data); } catch (err) { console.error('Gagal mengambil resep kategori:', err); }
     setIsLoading(false);
   }, []);
 
@@ -201,7 +246,7 @@ function HomeView() {
     setActiveTab('popular');
     setSearchStatus('idle');
     setIsLoading(true);
-    try { const data = await getPopularRecipes(); setRecipes(data); } catch {}
+    try { const data = await getPopularRecipes(); setRecipes(data); } catch (err) { console.error('Gagal mengambil resep populer:', err); }
     setIsLoading(false);
   }, []);
 
@@ -212,7 +257,7 @@ function HomeView() {
     setSearchQuery('');
     setSearchStatus('idle');
     setIsLoading(true);
-    try { const data = await getLatestRecipes(); setRecipes(data); } catch {}
+    try { const data = await getLatestRecipes(); setRecipes(data); } catch (err) { console.error('Gagal mengambil resep terbaru:', err); }
     setIsLoading(false);
   }, []);
 
@@ -229,7 +274,10 @@ function HomeView() {
     try {
       const ideas = await generateRecipeIdeasFromIngredients(ingredients, null);
       setAiRecipes(ideas);
-    } catch { setAiRecipes([]); }
+    } catch (err) {
+      console.error('Gagal memuat resep AI:', err);
+      setAiRecipes([]);
+    }
     finally { setIsAiLoading(false); }
   };
 
@@ -308,11 +356,11 @@ function HomeView() {
               <p className="hero-subtitle">Temukan ide masakan yang simpel, enak, dan cocok buat menu harian.</p>
             </div>
 
-            <SearchBar 
-              onSearch={handleSearch} 
-              isLoading={isLoading} 
-              initialValue={searchQuery} 
-              placeholder="Cari resep, bahan, atau menu favorit..." 
+            <SearchBar
+              onSearch={handleSearch}
+              isLoading={isLoading}
+              initialValue={searchQuery}
+              placeholder="Cari resep, bahan, atau menu favorit..."
             />
 
             {!hasSearched && <IngredientCtaCard onClick={() => setActiveTab('ai-search')} />}
@@ -336,6 +384,7 @@ function HomeView() {
               likedRecipes={likedRecipeIds}
               onToggleLike={handleToggleLike}
               searchStatus={searchStatus}
+              nonFoodQuery={nonFoodQuery}
             />
           </>
         )}
@@ -397,12 +446,11 @@ function HomeView() {
   );
 }
 
-import { Footer } from './components/Footer';
-import { AdminDashboard } from './components/AdminDashboard';
+
 
 function AppRoutes() {
   const auth = useAuth();
-  
+
   if (auth.isLoading) {
     return (
       <div className="app-shell" style={{ justifyContent: 'center', alignItems: 'center' }}>

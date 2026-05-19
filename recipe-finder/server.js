@@ -1,9 +1,11 @@
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import session from 'express-session';
+import { checkFoodIntent, validateExternalResults, askRecipeAssistant, expandKitchenQuery } from './aiService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -155,7 +157,7 @@ function formatRecipe(r) {
   };
 }
 
-function calculateRelevance(recipe, query) {
+function calculateRelevance(recipe, query, expandedTerms = []) {
   const q = query.toLowerCase();
   let score = 0;
 
@@ -184,8 +186,27 @@ function calculateRelevance(recipe, query) {
   // Ingredients scoring
   const ingredients = parseJsonField(recipe.ingredients);
   for (const ing of ingredients) {
-    if (ing.toLowerCase().includes(q)) { score += 10; break; }
+    if (ing.toLowerCase().includes(q)) { score += 25; break; }
   }
+
+  // Expanded term scoring
+  expandedTerms.forEach((term, index) => {
+    const t = term.toLowerCase();
+    const weight = Math.max(20 - (index * 2), 5); // 20, 18, 16, 14, 12
+    if (title.includes(t) || category.includes(t)) {
+      score += weight;
+    } else {
+      let matched = false;
+      for (const tag of tags) { if (tag.toLowerCase().includes(t)) { matched = true; break; } }
+      if (!matched) {
+         for (const kw of keywords) { if (kw.toLowerCase().includes(t)) { matched = true; break; } }
+      }
+      if (!matched) {
+         for (const ing of ingredients) { if (ing.toLowerCase().includes(t)) { matched = true; break; } }
+      }
+      if (matched) score += Math.floor(weight / 2);
+    }
+  });
 
   // Verified bonus
   if (recipe.isVerified) score += 25;
@@ -250,6 +271,59 @@ app.get('/api/recipes/search', async (req, res) => {
   } catch (error) {
     console.error('Search error:', error);
     res.status(500).json({ error: 'Search failed' });
+  }
+});
+
+// ─── Search Expansion endpoint ────────────────────────────
+app.get('/api/recipes/expand', async (req, res) => {
+  try {
+    const q = (req.query.q || '').trim();
+    if (!q) return res.json({ results: [], foodIntent: null });
+
+    const intentResult = await checkFoodIntent(q);
+    const isFood = intentResult.intent === 'food' || intentResult.intent === 'maybe_food';
+    if (!intentResult.canGenerateFallback) {
+      return res.json({ results: [], foodIntent: isFood ? null : false });
+    }
+
+    const expandedTerms = await expandKitchenQuery(q);
+    if (!expandedTerms || expandedTerms.length === 0) {
+      return res.json({ results: [], foodIntent: isFood });
+    }
+
+    const where = {
+      AND: [
+        { status: { not: 'rejected' } }
+      ],
+      OR: expandedTerms.map(term => ({
+        OR: [
+          { title: { contains: term } },
+          { category: { contains: term } },
+          { tags: { contains: term } },
+          { keywords: { contains: term } },
+          { ingredients: { contains: term } },
+          { shortDescription: { contains: term } }
+        ]
+      }))
+    };
+
+    const recipes = await prisma.recipe.findMany({ where, take: 50 });
+
+    const scored = recipes
+      .map(r => ({ ...r, _score: calculateRelevance(r, q, expandedTerms) }))
+      .filter(r => r._score > 0)
+      .sort((a, b) => b._score - a._score);
+
+    res.json({
+      results: scored.map(r => {
+        const { _score, ...recipe } = r;
+        return formatRecipe(recipe);
+      }),
+      foodIntent: intentResult.isFoodRelated
+    });
+  } catch (error) {
+    console.error('Expand search error:', error);
+    res.status(500).json({ error: 'Expand search failed' });
   }
 });
 
@@ -417,13 +491,33 @@ app.post('/api/recipes/:id/view', async (req, res) => {
 app.post('/api/recipes/cache-external', async (req, res) => {
   try {
     const data = req.body;
-    // Generate slug from title
-    const slug = (data.title || 'resep')
+    const normalizedTitle = (data.title || '').trim().toLowerCase();
+    const baseSlug = (data.title || 'resep')
       .toLowerCase()
       .replace(/[^\w\s-]/g, '')
       .replace(/\s+/g, '-')
-      .substring(0, 80) + '-' + Date.now();
+      .substring(0, 80);
 
+    // ── Dedup check: slug prefix OR exact title OR sourceUrl ──
+    const orConds = [
+      { slug: { startsWith: baseSlug } },
+      { title: { equals: data.title, mode: 'insensitive' } },
+    ];
+    if (data.sourceUrl) {
+      orConds.push({ sourceUrl: data.sourceUrl });
+    }
+
+    const existing = await prisma.recipe.findFirst({
+      where: {
+        OR: orConds,
+      },
+    });
+    if (existing) {
+      await prisma.recipe.update({ where: { id: existing.id }, data: { views: { increment: 1 } } });
+      return res.json(formatRecipe(existing));
+    }
+
+    const slug = baseSlug + '-' + Date.now();
     const recipe = await prisma.recipe.create({
       data: {
         slug,
@@ -452,21 +546,6 @@ app.post('/api/recipes/cache-external', async (req, res) => {
     });
     res.json(formatRecipe(recipe));
   } catch (error) {
-    // If sourceUrl already exists, just return the existing recipe
-    if (error.code === 'P2002') {
-      try {
-        const existing = await prisma.recipe.findFirst({
-          where: { sourceUrl: req.body.sourceUrl },
-        });
-        if (existing) {
-          await prisma.recipe.update({
-            where: { id: existing.id },
-            data: { views: { increment: 1 } },
-          });
-          return res.json(formatRecipe(existing));
-        }
-      } catch {}
-    }
     console.error('Cache external error:', error);
     res.status(500).json({ error: 'Failed to cache external recipe' });
   }
@@ -593,44 +672,6 @@ function normalizeExternalRecipe(raw) {
 
 // ─── AI Assistant Endpoint (Rule-based MVP) ──────────────────────────────
 
-const SUBSTITUTION_MAP = {
-  'kentang': 'ubi, singkong, wortel, labu siam',
-  'bawang bombay': 'bawang merah, daun bawang',
-  'santan': 'fiber creme, susu evaporasi, kemiri halus',
-  'cabai': 'saus sambal, bubuk cabai, lada',
-  'cabe': 'saus sambal, bubuk cabai, lada', // alias
-  'telur': 'tahu, tempe, ayam suwir',
-  'ayam': 'tahu, tempe, jamur, ikan',
-  'kecap': 'gula merah + sedikit garam, saus tiram, kecap asin',
-  'tomat': 'saus tomat, air asam jawa',
-  'daun bawang': 'seledri, bawang goreng',
-  'tepung terigu': 'tepung beras, maizena, tapioka'
-};
-
-function detectIntent(q) {
-  if (/(kalo gapunya|kalau nggak ada|ga ada|ganti apa|bisa diganti apa)/.test(q)) {
-    return 'ingredient_substitution';
-  }
-  if (/(bikin versi anak kos|anak kos)/.test(q)) return 'student_version';
-  if (/(bikin lebih hemat|hemat)/.test(q)) return 'budget_version';
-  if (/(bikin lebih pedas|pedas|pedes)/.test(q)) return 'spicy_version';
-  if (/(ringkas langkahnya|ringkas langkah|ringkas)/.test(q)) return 'summarize_steps';
-  if (/(buat \d+ porsi|buat \d+ orang|porsi)/.test(q)) return 'portion_adjustment';
-  return 'fallback';
-}
-
-function extractIngredient(q) {
-  // Matches phrases like: "kalo gapunya kentang gmn", "kalau nggak ada santan gimana"
-  let match = q.match(/(?:kalo gapunya|kalau nggak ada|ga ada)\s+([a-z\s]+?)(?:\s+gmn|\s+gimana|\s+bisa diganti apa|\s+ganti apa|\s+dong|\?|$)/);
-  if (match) return match[1].trim();
-
-  // Matches phrases like: "bawang bombay bisa diganti apa", "tomat ganti apa"
-  match = q.match(/([a-z\s]+?)\s+(?:bisa diganti apa|ganti apa)/);
-  if (match) return match[1].trim();
-
-  return null;
-}
-
 app.post('/api/ai/ask-recipe', async (req, res) => {
   try {
     const { recipeId, question, recipeContext } = req.body;
@@ -638,74 +679,8 @@ app.post('/api/ai/ask-recipe', async (req, res) => {
       return res.status(400).json({ error: 'Pertanyaan wajib diisi.' });
     }
 
-    // Future: Call Gemini API here using `recipeContext` and `question`.
-    // if (process.env.GEMINI_API_KEY) {
-    //    try {
-    //      const answer = await callGemini(question, recipeContext);
-    //      return res.json({ question, answer });
-    //    } catch (e) {
-    //      // Fallback to rule-based on failure
-    //    }
-    // }
-
-    // Mock thinking delay
-    await new Promise(r => setTimeout(r, 1200));
+    const { answer } = await askRecipeAssistant(question, recipeContext);
     
-    const q = question.toLowerCase();
-    const intent = detectIntent(q);
-    const titleContext = recipeContext?.title ? ` untuk resep ${recipeContext.title}` : '';
-    let answer = '';
-
-    switch (intent) {
-      case 'ingredient_substitution':
-        const ingredient = extractIngredient(q);
-        if (ingredient) {
-          const matchKey = Object.keys(SUBSTITUTION_MAP).find(k => ingredient.includes(k) || k.includes(ingredient));
-          if (matchKey) {
-            answer = `Kalau nggak ada ${matchKey}, bisa diganti ${SUBSTITUTION_MAP[matchKey]}. Kalau ${matchKey} cuma pelengkap, aman diskip. Tapi kalau jadi bahan utama, pilih pengganti yang teksturnya atau rasanya mirip biar hasilnya tetap enak.`;
-          } else {
-            answer = `Bisa, tapi tergantung fungsi ${ingredient} di resep. Kalau hanya pelengkap, bisa diskip. Kalau bahan utama, sebaiknya diganti dengan bahan yang rasa atau teksturnya mirip.`;
-          }
-        } else {
-          answer = `Bahan mana yang mau diganti? Coba sebutkan nama bahannya ya.`;
-        }
-        break;
-
-      case 'student_version':
-        answer = `Versi Anak Kos${titleContext}:\n- Kurangi bahan-bahan yang mahal\n- Gunakan bahan pantry yang umum ada di kos\n- Pakai alat masak seadanya (misal 1 panci/wajan saja)\n- Bikin langkah masaknya lebih simpel (misal pakai bumbu dasar)`;
-        break;
-
-      case 'budget_version':
-        answer = `Versi Hemat${titleContext}:\nCoba ganti bahan utama/protein dengan pilihan yang lebih murah, atau gunakan bumbu dan bahan yang lebih sederhana tanpa mengurangi rasa.`;
-        break;
-
-      case 'spicy_version':
-        answer = `Bikin Lebih Pedas${titleContext}:\nKamu bisa menambahkan cabai rawit, sambal, lada, atau chili oil ke dalam resep ini sesuai selera pedasmu.`;
-        break;
-
-      case 'summarize_steps':
-        if (recipeContext?.steps && Array.isArray(recipeContext.steps) && recipeContext.steps.length > 0) {
-          const s = recipeContext.steps;
-          if (s.length <= 4) {
-            answer = `Ringkasan Langkah${titleContext}:\n` + s.map((step, i) => `${i + 1}. ${step}`).join('\n');
-          } else {
-            answer = `Ringkasan Langkah${titleContext}:\n1. Siapkan bahan (potong/cuci).\n2. ${s[Math.floor(s.length / 3)] || 'Tumis/masak bumbu dan bahan utama.'}\n3. ${s[Math.floor((s.length / 3) * 2)] || 'Tambahkan sisa bahan dan perasa.'}\n4. ${s[s.length - 1] || 'Sajikan selagi hangat.'}`;
-          }
-        } else {
-          answer = `Ringkasan Langkah${titleContext}:\n1. Siapkan semua bahan.\n2. Olah bahan utama dan bumbu.\n3. Masak hingga matang dan sajikan.`;
-        }
-        break;
-
-      case 'portion_adjustment':
-        answer = `Sesuaikan Porsi${titleContext}:\nUntuk mengubah porsi, kalikan atau bagi takaran setiap bahan dengan perbandingan yang kamu inginkan. (Contoh: jika ingin porsi 2x lipat, kalikan semua bahan dengan 2).`;
-        break;
-
-      case 'fallback':
-      default:
-        answer = `Racikin AI masih belajar!\n\nCoba tanya:\n- "kalo gapunya santan ganti apa"\n- "bikin versi anak kos"\n- "bikin lebih hemat"\n- "bikin lebih pedas"\n- "ringkas langkahnya"`;
-        break;
-    }
-
     res.json({ question, answer });
   } catch (error) {
     console.error('AI ask error:', error);
@@ -715,9 +690,9 @@ app.post('/api/ai/ask-recipe', async (req, res) => {
 
 
 // ─── Smart Dynamic Fallback Generator ─────────────────────
-const SWEET_KEYWORDS = ['kue', 'cake', 'bolu', 'brownies', 'puding', 'pudding', 'donat', 'roti', 'biskuit', 'cookies', 'pancake', 'waffle', 'es krim', 'coklat', 'chocolate', 'gula', 'madu', 'klepon', 'onde', 'lapis', 'nastar', 'kastengel', 'dadar gulung', 'serabi', 'martabak manis', 'pisang', 'kolak', 'setup', 'manisan', 'selai', 'panna cotta', 'mousse', 'tart', 'pie'];
-const DRINK_KEYWORDS = ['teh', 'kopi', 'jus', 'susu', 'smoothie', 'milkshake', 'es', 'wedang', 'bandrek', 'bajigur', 'sekoteng', 'cendol', 'dawet', 'cincau', 'sirup', 'lemon', 'jahe', 'kunyit', 'soda', 'mocktail', 'kelapa'];
-const PROTEIN_KEYWORDS = ['ayam', 'sapi', 'babi', 'kambing', 'bebek', 'ikan', 'udang', 'cumi', 'kepiting', 'kerang', 'lobster', 'gurita', 'tongkol', 'tuna', 'salmon', 'lele', 'nila', 'patin', 'bandeng', 'mujair', 'daging', 'telur'];
+const SWEET_KEYWORDS = ['kue','cake','bolu','brownies','puding','pudding','donat','roti','biskuit','pancake','coklat','chocolate','klepon','onde','dadar','serabi','martabak manis','pisang','kolak','manisan','tart','pie','wajik','cenil'];
+const DRINK_KEYWORDS = ['teh','kopi','jus','susu','smoothie','milkshake','wedang','bandrek','bajigur','sekoteng','cendol','dawet','cincau','sirup','kelapa muda','boba','thai tea'];
+const PROTEIN_KEYWORDS = ['ayam','sapi','babi','kambing','bebek','ikan','udang','cumi','kepiting','kerang','tongkol','tuna','salmon','lele','nila','patin','bandeng','daging','telur','usus','jeroan','hati','ampela','babat','kikil','limpa','paru','otak','lidah','iso'];
 
 function detectQueryCategory(query) {
   const q = query.toLowerCase();
@@ -731,83 +706,175 @@ function capitalizeWords(str) {
   return str.replace(/\b\w/g, c => c.toUpperCase());
 }
 
+// Build realistic ingredients for a main-ingredient query
+function buildIngredients(mainIngredient, category) {
+  const q = mainIngredient;
+  if (category === 'protein') {
+    return [
+      `500 gram ${q}`,
+      '5 siung bawang putih, cincang',
+      '4 siung bawang merah, iris',
+      '3 buah cabai merah, iris (sesuai selera)',
+      '2 sdm kecap manis',
+      '1 sdt garam',
+      '1 sdt lada bubuk',
+      '1 ruas jahe, memarkan',
+      'minyak goreng secukupnya',
+    ];
+  }
+  if (category === 'sweet') {
+    return [
+      `200 gram ${q}`,
+      '2 butir telur',
+      '150 gram gula pasir',
+      '100 gram tepung terigu',
+      '100 ml susu cair',
+      '50 gram mentega, lelehkan',
+      '1 sdt baking powder',
+      '1/2 sdt vanili',
+    ];
+  }
+  if (category === 'drink') {
+    return [
+      `2 sdm ${q} bubuk atau 2 sachet`,
+      '200 ml air panas',
+      '100 ml susu cair (opsional)',
+      '2 sdm gula pasir atau gula aren',
+      'es batu secukupnya',
+    ];
+  }
+  // generic
+  return [
+    `300 gram ${q}`,
+    '3 siung bawang putih',
+    '3 siung bawang merah',
+    '2 buah cabai merah',
+    '1 sdt garam',
+    '1 sdt gula pasir',
+    'minyak goreng secukupnya',
+    'air secukupnya',
+  ];
+}
+
+function buildSteps(mainIngredient, category, title) {
+  const q = mainIngredient;
+  if (category === 'protein') {
+    return [
+      `Bersihkan ${q}, potong sesuai selera.`,
+      'Haluskan atau iris bawang putih, bawang merah, cabai, dan jahe.',
+      `Panaskan minyak, tumis bumbu hingga harum.`,
+      `Masukkan ${q}, aduk rata hingga berubah warna.`,
+      'Tambahkan kecap manis, garam, lada, dan sedikit air.',
+      'Masak dengan api kecil hingga bumbu meresap dan matang. Koreksi rasa, sajikan.',
+    ];
+  }
+  if (category === 'sweet') {
+    return [
+      'Panaskan oven 180°C. Siapkan loyang, olesi mentega.',
+      'Kocok telur dan gula hingga mengembang dan pucat.',
+      `Masukkan ${q} yang sudah dihaluskan atau dicairkan.`,
+      'Ayak tepung terigu dan baking powder, aduk perlahan.',
+      'Tuang susu dan mentega cair, aduk rata.',
+      'Panggang 30–35 menit atau hingga matang. Tusuk tengah, jika bersih berarti matang.',
+    ];
+  }
+  if (category === 'drink') {
+    return [
+      `Seduh ${q} dengan air panas, aduk rata.`,
+      'Tambahkan gula, aduk hingga larut.',
+      'Tambahkan susu jika suka.',
+      'Sajikan panas, atau tuang ke gelas berisi es batu untuk versi dingin.',
+    ];
+  }
+  return [
+    `Siapkan dan bersihkan ${q}.`,
+    'Haluskan atau iris semua bumbu.',
+    'Panaskan minyak, tumis bumbu hingga harum.',
+    `Masukkan ${q}, aduk rata.`,
+    'Tambahkan garam, gula, dan air secukupnya.',
+    'Masak hingga matang. Koreksi rasa, sajikan hangat.',
+  ];
+}
+
 function generateDynamicFallback(query) {
   const category = detectQueryCategory(query);
   const q = capitalizeWords(query.trim());
+  const ql = query.trim().toLowerCase();
   let templates = [];
 
   switch (category) {
     case 'protein':
       templates = [
-        { title: `${q} Kecap`, category: 'Lauk', tags: ['Protein', 'Kecap'] },
-        { title: `${q} Goreng Rempah`, category: 'Lauk', tags: ['Protein', 'Goreng'] },
-        { title: `${q} Rica-Rica`, category: 'Lauk', tags: ['Protein', 'Pedas'] },
-        { title: `${q} Bakar Bumbu Rujak`, category: 'Lauk', tags: ['Protein', 'Bakar'] },
+        { title: `${q} Kecap`, category: 'Lauk', tags: ['Protein', 'Kecap'], cookingTime: '35 Menit', difficulty: 'Mudah', servings: '3' },
+        { title: `${q} Goreng Rempah`, category: 'Lauk', tags: ['Protein', 'Goreng'], cookingTime: '30 Menit', difficulty: 'Mudah', servings: '3' },
+        { title: `${q} Rica-Rica`, category: 'Lauk', tags: ['Protein', 'Pedas'], cookingTime: '40 Menit', difficulty: 'Sedang', servings: '4' },
+        { title: `${q} Bakar Bumbu Kecap`, category: 'Lauk', tags: ['Protein', 'Bakar'], cookingTime: '45 Menit', difficulty: 'Sedang', servings: '3' },
       ];
       break;
     case 'sweet':
       templates = [
-        { title: `${q} Kukus Lembut`, category: 'Kue & Dessert', tags: ['Kue', 'Kukus'] },
-        { title: `${q} Panggang`, category: 'Kue & Dessert', tags: ['Kue', 'Panggang'] },
-        { title: `${q} Lumer`, category: 'Kue & Dessert', tags: ['Dessert', 'Manis'] },
-        { title: `${q} Spesial Rumahan`, category: 'Kue & Dessert', tags: ['Kue', 'Rumahan'] },
+        { title: `${q} Kukus Lembut`, category: 'Kue & Dessert', tags: ['Kue', 'Kukus'], cookingTime: '40 Menit', difficulty: 'Mudah', servings: '8' },
+        { title: `${q} Panggang Coklat`, category: 'Kue & Dessert', tags: ['Kue', 'Panggang'], cookingTime: '50 Menit', difficulty: 'Sedang', servings: '8' },
+        { title: `${q} Lumer`, category: 'Kue & Dessert', tags: ['Dessert', 'Manis'], cookingTime: '35 Menit', difficulty: 'Mudah', servings: '6' },
       ];
       break;
     case 'drink':
       templates = [
-        { title: `Es ${q} Segar`, category: 'Minuman', tags: ['Minuman', 'Es'] },
-        { title: `${q} Hangat`, category: 'Minuman', tags: ['Minuman', 'Hangat'] },
-        { title: `${q} Susu`, category: 'Minuman', tags: ['Minuman', 'Susu'] },
-        { title: `${q} Spesial`, category: 'Minuman', tags: ['Minuman'] },
+        { title: `Es ${q} Segar`, category: 'Minuman', tags: ['Minuman', 'Es'], cookingTime: '5 Menit', difficulty: 'Mudah', servings: '2' },
+        { title: `${q} Susu Hangat`, category: 'Minuman', tags: ['Minuman', 'Hangat'], cookingTime: '5 Menit', difficulty: 'Mudah', servings: '2' },
+        { title: `${q} Spesial`, category: 'Minuman', tags: ['Minuman'], cookingTime: '10 Menit', difficulty: 'Mudah', servings: '2' },
       ];
       break;
     case 'generic':
     default:
       templates = [
-        { title: `Resep ${q} Rumahan`, category: 'Lainnya', tags: ['Rumahan'] },
-        { title: `${q} Sederhana`, category: 'Lainnya', tags: ['Sederhana'] },
-        { title: `${q} ala Rumahan`, category: 'Lainnya', tags: ['Rumahan'] },
-        { title: `Ide Masakan ${q}`, category: 'Lainnya', tags: ['Ide Masakan'] },
+        { title: `${q} Tumis Bawang`, category: 'Sayur', tags: ['Sayur', 'Tumis'], cookingTime: '20 Menit', difficulty: 'Mudah', servings: '3' },
+        { title: `${q} Goreng Krispy`, category: 'Camilan', tags: ['Camilan', 'Goreng'], cookingTime: '25 Menit', difficulty: 'Mudah', servings: '3' },
+        { title: `${q} Kuah Segar`, category: 'Sup', tags: ['Sup', 'Kuah'], cookingTime: '30 Menit', difficulty: 'Mudah', servings: '4' },
       ];
       break;
   }
 
-  return templates.map(t => ({
-    ...t,
-    id: `ext-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    slug: t.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, ''),
-    image: null,
-    shortDescription: `Resep ${t.title} dari sumber luar.`,
-    ingredients: ['Bahan akan ditampilkan setelah dibuka'],
-    steps: ['Langkah-langkah akan ditampilkan setelah dibuka'],
-    tools: [],
-    keywords: [query],
-    cookingTime: null,
-    difficulty: 'Sedang',
-    servings: null,
-    sourceUrl: null,
-    sourceName: 'Internet',
-    sourceType: 'external',
-    status: 'cached_unverified',
-    isVerified: false,
-    likes: 0, bookmarks: 0, views: 0,
-    caloriesEstimate: 0,
-    _isExternalMock: true,
-  }));
+  return templates.map(t => {
+    const ingredients = buildIngredients(ql, category);
+    const steps = buildSteps(ql, category, t.title);
+    return {
+      ...t,
+      id: `ext-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      slug: t.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, ''),
+      image: null,
+      shortDescription: `Resep ${t.title} rumahan yang mudah dibuat dan lezat.`,
+      ingredients,
+      steps,
+      tools: ['wajan atau panci', 'spatula', 'pisau', 'talenan', 'kompor'],
+      tips: 'Koreksi rasa sebelum diangkat. Sesuaikan tingkat kepedasan dengan selera keluarga.',
+      keywords: [query],
+      sourceUrl: null,
+      sourceName: 'Racikin Fallback',
+      sourceType: 'external',
+      status: 'cached_unverified',
+      isVerified: false,
+      likes: 0, bookmarks: 0, views: 0,
+      caloriesEstimate: 0,
+      _isExternalMock: true,
+    };
+  });
 }
 
 app.get('/api/external-search', async (req, res) => {
   try {
     const q = (req.query.q || '').trim().toLowerCase();
-    if (!q) return res.json([]);
+    if (!q) return res.json({ results: [], foodIntent: false });
 
-    // ── MOCK: Replace this block with real external API call ──
-    // Example future implementation:
-    //   const response = await fetch(`https://serpapi.com/search?q=${q}+resep&api_key=${API_KEY}`);
-    //   const rawResults = await response.json();
-    //   const normalized = rawResults.map(normalizeExternalRecipe);
-    //   return res.json(normalized);
+    // ── Step 1: AI food intent check (Gemini or rule-based) ──
+    const intentResult = await checkFoodIntent(q);
+    const isFood = intentResult.intent === 'food' || intentResult.intent === 'maybe_food';
+    if (!intentResult.canGenerateFallback) {
+      console.log(`[Search] Fallback blocked for query: "${q}" (${intentResult.reason})`);
+      return res.json({ results: [], foodIntent: isFood ? null : false });
+    }
 
+    // ── Step 2: Try hardcoded MOCK_EXTERNAL_RECIPES first ──
     const results = [];
     for (const [keyword, recipes] of Object.entries(MOCK_EXTERNAL_RECIPES)) {
       if (q.includes(keyword) || keyword.includes(q)) {
@@ -828,18 +895,31 @@ app.get('/api/external-search', async (req, res) => {
       }
     }
 
-    // If no hardcoded match, generate smart dynamic fallback
+    // ── Step 3: Dynamic fallback if no hardcoded match ──
     if (results.length === 0) {
       const dynamic = generateDynamicFallback(q);
       results.push(...dynamic);
     }
 
-    res.json(results);
+    // ── Step 4: Validate results (min fields + maybe-query cooking-word check) ──
+    const validated = validateExternalResults(results, intentResult);
+
+    // ── Step 5: Dedup against existing DB slugs ──
+    const slugs = validated.map(r => r.slug);
+    const existingInDb = await prisma.recipe.findMany({
+      where: { slug: { in: slugs } },
+      select: { slug: true },
+    });
+    const existingSlugSet = new Set(existingInDb.map(r => r.slug));
+    const deduped = validated.filter(r => !existingSlugSet.has(r.slug));
+
+    res.json({ results: deduped, foodIntent: intentResult.isFoodRelated });
   } catch (error) {
     console.error('External search error:', error);
-    res.status(500).json({ error: 'External search failed' });
+    res.status(500).json({ results: [], foodIntent: 'maybe', error: 'External search failed' });
   }
 });
+
 
 // ─── Admin Protected Routes ─────────────────────────────────
 app.use('/api/admin', requireAdmin);

@@ -1,21 +1,9 @@
-import Database from 'better-sqlite3';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { PrismaClient } from '@prisma/client';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const dbPath = path.join(__dirname, '..', 'prisma', 'dev.db');
-const db = new Database(dbPath);
+const prisma = new PrismaClient();
 
 function slugify(text) {
   return text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim().substring(0, 80);
-}
-
-function uuid() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = Math.random() * 16 | 0;
-    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-  });
 }
 
 const VERIFIED_RECIPES = [
@@ -63,7 +51,7 @@ const VERIFIED_RECIPES = [
     tags: ["Telur", "Pedas", "Cepat & Simpel", "Anak Kos"],
     keywords: ["balado", "telur", "pedas", "simpel"],
     ingredients: ["6 butir telur ayam (rebus, kupas)", "2 lembar daun jeruk", "1 buah tomat merah", "Bumbu Halus: 10 cabe merah keriting, 5 cabe rawit", "Bumbu Halus: 6 bawang merah, 2 bawang putih", "Garam, gula merah, kaldu bubuk"],
-    steps: ["Goreng telur rebus hingga berkulit.", "Tumis bumbu halus dan daun jeruk.", "Masukkan tomat, hancurkan.", "Bumbui dengan garam, gula merah, kaldu.", "Masukkan telur, aduk rata."],
+    steps: ["Goreng telur rebus hingga berkulit.", "Tumis bumbu halus and daun jeruk.", "Masukkan tomat, hancurkan.", "Bumbui dengan garam, gula merah, kaldu.", "Masukkan telur, aduk rata."],
     tips: "Taburi wajan dengan sedikit tepung terigu sebelum memasukkan telur agar tidak meletup.",
     alternativeIngredients: "Telur bisa diganti tahu goreng atau kentang dadu goreng."
   },
@@ -175,7 +163,7 @@ const VERIFIED_RECIPES = [
     tags: ["Ikan", "Mewah", "Lauk Harian"],
     keywords: ["ikan bakar", "nila", "kecap", "bumbu"],
     ingredients: ["2 ekor ikan nila (kerat-kerat)", "1 jeruk nipis & garam", "Bumbu Oles: 5 sdm kecap manis, 1 sdm mentega cair", "Bumbu Halus: 5 bawang merah, 3 bawang putih", "Bumbu Halus: 1 sdt ketumbar, 2 cm kunyit, 1 cm jahe"],
-    steps: ["Cuci ikan, lumuri jeruk nipis dan garam.", "Tumis bumbu halus.", "Campurkan setengah bumbu dengan kecap dan mentega.", "Ungkep ikan sebentar.", "Panggang, olesi bumbu kecap berulang kali."],
+    steps: ["Cuci ikan, lumuri jeruk nipis dan garam.", "Tumis bumbu halus.", "Campurkan setengah bumbu dengan kecap and mentega.", "Ungkep ikan sebentar.", "Panggang, olesi bumbu kecap berulang kali."],
     tips: "Mentega cair membuat ikan mengkilat dan tidak mudah lengket.",
     alternativeIngredients: "Ganti ikan nila dengan gurame atau bawal."
   },
@@ -261,47 +249,85 @@ const VERIFIED_RECIPES = [
   }
 ];
 
-console.log('Seeding verified recipes...');
-const now = new Date().toISOString();
+async function seed() {
+  console.log('Seeding verified recipes via Prisma Client...');
+  const now = new Date();
+  let seeded = 0;
 
-const insert = db.prepare(`
-  INSERT OR IGNORE INTO Recipe (
-    id, slug, title, image, category, shortDescription, fullDescription,
-    ingredients, tools, steps, tips, alternativeIngredients,
-    cookingTime, difficulty, servings, caloriesEstimate,
-    tags, keywords, sourceType, sourceUrl, sourceName,
-    status, isVerified, likes, bookmarks, views, createdAt, updatedAt
-  ) VALUES (
-    ?, ?, ?, ?, ?, ?, ?,
-    ?, ?, ?, ?, ?,
-    ?, ?, ?, ?,
-    ?, ?, ?, ?, ?,
-    ?, ?, ?, ?, ?, ?, ?
-  )
-`);
-
-let seeded = 0;
-for (const r of VERIFIED_RECIPES) {
-  const id = uuid();
-  const slug = slugify(r.title);
-  try {
-    insert.run(
-      id, slug, r.title, null, r.category, r.shortDescription, null,
-      JSON.stringify(r.ingredients), null, JSON.stringify(r.steps), r.tips || null, r.alternativeIngredients || null,
-      r.cookingTime, r.difficulty, r.servings, r.caloriesEstimate,
-      JSON.stringify(r.tags), JSON.stringify(r.keywords), 'internal', null, 'Racikin',
-      'verified', 1, r.likes, 0, 0, now, now
-    );
-    console.log(`  [SEEDED] ${r.title}`);
-    seeded++;
-  } catch (err) {
-    console.log(`  [SKIP] ${r.title}: ${err.message}`);
+  for (const r of VERIFIED_RECIPES) {
+    const slug = slugify(r.title);
+    try {
+      // Idempotently create or update
+      await prisma.recipe.upsert({
+        where: { slug },
+        update: {
+          // In case we want to sync static info, but we do NOT overwrite likes/bookmarks/views to preserve user interactions
+          title: r.title,
+          category: r.category,
+          shortDescription: r.shortDescription,
+          ingredients: JSON.stringify(r.ingredients),
+          steps: JSON.stringify(r.steps),
+          tags: JSON.stringify(r.tags),
+          keywords: JSON.stringify(r.keywords),
+          tips: r.tips || null,
+          alternativeIngredients: r.alternativeIngredients || null,
+          cookingTime: r.cookingTime,
+          difficulty: r.difficulty,
+          servings: String(r.servings),
+          caloriesEstimate: r.caloriesEstimate || 0,
+        },
+        create: {
+          slug,
+          title: r.title,
+          image: null,
+          category: r.category,
+          shortDescription: r.shortDescription,
+          fullDescription: null,
+          ingredients: JSON.stringify(r.ingredients),
+          tools: r.tools ? JSON.stringify(r.tools) : null,
+          steps: JSON.stringify(r.steps),
+          tips: r.tips || null,
+          alternativeIngredients: r.alternativeIngredients || null,
+          cookingTime: r.cookingTime,
+          difficulty: r.difficulty,
+          servings: String(r.servings),
+          caloriesEstimate: r.caloriesEstimate || 0,
+          tags: JSON.stringify(r.tags),
+          keywords: JSON.stringify(r.keywords),
+          sourceType: 'internal',
+          sourceUrl: null,
+          sourceName: 'Racikin',
+          status: 'verified',
+          isVerified: true,
+          likes: r.likes || 0,
+          bookmarks: 0,
+          views: 0,
+          createdAt: now,
+          updatedAt: now,
+        },
+      });
+      console.log(`  [SEEDED] ${r.title}`);
+      seeded++;
+    } catch (err) {
+      console.error(`  [FAIL] ${r.title}:`, err.message);
+    }
   }
+
+  console.log(`\nSeed completed! Successfully upserted ${seeded} verified recipes.`);
+  
+  const counts = await prisma.recipe.aggregate({
+    _count: {
+      id: true,
+    },
+  });
+  console.log(`Total recipes in DB: ${counts._count.id}`);
 }
 
-console.log(`\nSeeded ${seeded} verified recipes.`);
-console.log(`Total recipes: ${db.prepare('SELECT COUNT(*) as c FROM Recipe').get().c}`);
-console.log(`Verified: ${db.prepare("SELECT COUNT(*) as c FROM Recipe WHERE status = 'verified'").get().c}`);
-console.log(`Scraped: ${db.prepare("SELECT COUNT(*) as c FROM Recipe WHERE status = 'scraped'").get().c}`);
-
-db.close();
+seed()
+  .catch((e) => {
+    console.error('Fatal seed error:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

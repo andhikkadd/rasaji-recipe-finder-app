@@ -1,5 +1,5 @@
 import { normalizeRecipe } from '../utils/recipeNormalizer';
-import type { Recipe, SearchFilters } from '../types';
+import type { Recipe, SearchFilters, SourceType, RecipeStatus } from '../types';
 
 const API = '/api';
 
@@ -17,8 +17,40 @@ function dedup(title: string): string {
   return t;
 }
 
+interface RawRecipe {
+  id: string;
+  slug?: string;
+  title?: string;
+  image?: string;
+  category?: string;
+  shortDescription?: string;
+  fullDescription?: string;
+  ingredients?: unknown;
+  tools?: unknown;
+  steps?: unknown;
+  tips?: string;
+  alternativeIngredients?: string;
+  prepTime?: string;
+  cookTime?: string;
+  cookingTime?: string;
+  difficulty?: string;
+  servings?: string | number;
+  caloriesEstimate?: number;
+  tags?: unknown;
+  keywords?: unknown;
+  sourceType?: string;
+  sourceUrl?: string;
+  sourceName?: string;
+  status?: string;
+  isVerified?: boolean;
+  likes?: number;
+  bookmarks?: number;
+  views?: number;
+  _isExternalMock?: boolean;
+}
+
 // ─── Normalize API response ──────────────────────────────
-function normalize(raw: any): Recipe {
+function normalize(raw: RawRecipe): Recipe {
   const baseRecipe: Recipe = {
     id: raw.id,
     slug: raw.slug || raw.id,
@@ -27,9 +59,9 @@ function normalize(raw: any): Recipe {
     category: raw.category || 'Lainnya',
     shortDescription: raw.shortDescription || buildDesc(raw),
     fullDescription: raw.fullDescription || undefined,
-    ingredients: Array.isArray(raw.ingredients) ? raw.ingredients : [],
-    tools: Array.isArray(raw.tools) ? raw.tools : undefined,
-    steps: Array.isArray(raw.steps) ? raw.steps : [],
+    ingredients: Array.isArray(raw.ingredients) ? (raw.ingredients as string[]) : [],
+    tools: Array.isArray(raw.tools) ? (raw.tools as string[]) : undefined,
+    steps: Array.isArray(raw.steps) ? (raw.steps as string[]) : [],
     tips: raw.tips || undefined,
     alternativeIngredients: raw.alternativeIngredients || undefined,
     prepTime: raw.prepTime || undefined,
@@ -38,12 +70,12 @@ function normalize(raw: any): Recipe {
     difficulty: raw.difficulty || 'Sedang',
     servings: raw.servings || '-',
     caloriesEstimate: raw.caloriesEstimate || 0,
-    tags: Array.isArray(raw.tags) ? raw.tags : [],
-    keywords: Array.isArray(raw.keywords) ? raw.keywords : undefined,
-    sourceType: raw.sourceType || 'internal',
+    tags: Array.isArray(raw.tags) ? (raw.tags as string[]) : [],
+    keywords: Array.isArray(raw.keywords) ? (raw.keywords as string[]) : undefined,
+    sourceType: (raw.sourceType as SourceType) || 'internal',
     sourceUrl: raw.sourceUrl || undefined,
     sourceName: raw.sourceName || undefined,
-    status: raw.status || 'verified',
+    status: (raw.status as RecipeStatus) || 'verified',
     isVerified: raw.isVerified || false,
     likes: raw.likes || 0,
     bookmarks: raw.bookmarks || 0,
@@ -54,8 +86,8 @@ function normalize(raw: any): Recipe {
   return normalizeRecipe(baseRecipe);
 }
 
-function buildDesc(raw: any): string {
-  const ings: string[] = Array.isArray(raw.ingredients) ? raw.ingredients : [];
+function buildDesc(raw: RawRecipe): string {
+  const ings: string[] = Array.isArray(raw.ingredients) ? (raw.ingredients as string[]) : [];
   if (ings.length > 0) {
     return `Bahan utama: ${ings.slice(0, 3).join(', ')}${ings.length > 3 ? '...' : ''}`;
   }
@@ -67,14 +99,25 @@ function buildDesc(raw: any): string {
 /** Relevance-scored search */
 export async function searchRecipes(query: string, filters?: SearchFilters): Promise<Recipe[]> {
   const params = new URLSearchParams();
-  if (query) params.set('q', query);
-  if (filters?.category) params.set('category', filters.category);
-  if (filters?.status) params.set('status', filters.status);
-
+  if (query) params.append('q', query);
+  if (filters?.category && filters.category !== 'Semua') {
+    params.append('category', filters.category);
+  }
+  
   const res = await fetch(`${API}/recipes/search?${params}`);
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  if (!res.ok) throw new Error('Search failed');
   const data = await res.json();
-  return data.map(normalize);
+  return Array.isArray(data) ? data.map(normalize) : [];
+}
+
+export async function searchExpandedRecipes(query: string): Promise<{ recipes: Recipe[], foodIntent: boolean | null }> {
+  const res = await fetch(`${API}/recipes/expand?q=${encodeURIComponent(query)}`);
+  if (!res.ok) throw new Error('Expand search failed');
+  const data = await res.json();
+  return {
+    recipes: Array.isArray(data.results) ? data.results.map(normalize) : [],
+    foodIntent: data.foodIntent
+  };
 }
 
 /** Get popular recipes sorted by likes + views */

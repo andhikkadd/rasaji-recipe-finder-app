@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Recipe } from '../types';
 import { getRecipeImage } from '../utils/imageUtils';
+import { cacheExternalRecipe } from '../services/recipeApi';
 import './RecipePreviewModal.css';
 
 interface RecipePreviewModalProps {
@@ -19,9 +20,19 @@ export function RecipePreviewModal({ recipe, onClose }: RecipePreviewModalProps)
     };
   }, []);
 
-  const handleReadFull = () => {
+  const handleReadFull = async () => {
+    let targetRecipe = recipe;
+    if (recipe._isExternalMock) {
+      try {
+        const cached = await cacheExternalRecipe(recipe);
+        targetRecipe = cached;
+      } catch (err) {
+        console.error('Failed to cache external mock recipe:', err);
+        return; // Stop navigation if caching fails
+      }
+    }
     onClose();
-    navigate(`/resep/${recipe.slug || recipe.id}`);
+    navigate(`/resep/${targetRecipe.slug || targetRecipe.id}`);
   };
 
   const totalIng = recipe.ingredients.length;
