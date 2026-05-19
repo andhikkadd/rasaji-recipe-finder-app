@@ -1,6 +1,10 @@
 # Stage 1: Build the Vite frontend and generate Prisma client
-FROM node:22-alpine AS builder
+FROM node:22-bookworm-slim AS builder
 WORKDIR /app
+
+# Install OpenSSL for Prisma
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
 COPY package*.json ./
 RUN npm install
 COPY . .
@@ -8,8 +12,11 @@ RUN npm run build
 RUN npx prisma generate
 
 # Stage 2: Production runtime environment
-FROM node:22-alpine
+FROM node:22-bookworm-slim
 WORKDIR /app
+
+# Install OpenSSL in the runtime environment
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # Copy built frontend assets, Prisma schemas, node_modules, and backend code from the builder stage
 COPY --from=builder /app/dist ./dist
