@@ -1,5 +1,8 @@
 async function test() {
   try {
+    const resH = await fetch('http://localhost:8080/api/health');
+    console.log('GET /api/health:', resH.status, await resH.text());
+
     const res1 = await fetch('http://localhost:8080/');
     console.log('GET /:', res1.status, res1.headers.get('content-type'));
 

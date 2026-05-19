@@ -39,6 +39,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// ─── Health Check Endpoint (No DB / session dependencies) ──
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true });
+});
+
 const distPath = path.join(__dirname, 'dist');
 
 app.use(express.json());
