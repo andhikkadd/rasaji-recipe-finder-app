@@ -6,6 +6,7 @@ import { askRecipeAssistant } from '../services/aiRecipeService';
 import { useAuth } from '../contexts/AuthContext';
 import { toggleLike as apiToggleLike, toggleBookmark as apiToggleBookmark } from '../services/recipeApi';
 import { AuthModal } from './AuthModal';
+import { features } from '../config/features';
 import './RecipeFullPage.css';
 
 interface ChatMessage {
@@ -308,82 +309,84 @@ export function RecipeFullPage() {
       </div>
 
       {/* 5. Floating Tanya Racikin Assistant */}
-      <div className={`tanya-floating-container ${isTanyaOpen ? 'open' : ''}`}>
-        
-        {/* Greeting Bubble */}
-        {!isTanyaOpen && showGreeting && (
-          <div className="tanya-greeting-bubble animate-slide-up">
-            Hai, ada yang bisa Racikin bantu?
-            <button className="close-greeting" onClick={(e) => { e.stopPropagation(); setShowGreeting(false); }}>✕</button>
-          </div>
-        )}
-
-        {isTanyaOpen && (
-          <div className="tanya-chat-window shadow-xl animate-scale-in">
-            <div className="tanya-chat-header">
-               <div className="tanya-header-left">
-                 <div className="tanya-chat-title">
-                    <span className="sparkles-icon">✨</span>
-                    Tanya Racikin
-                 </div>
-                 <div className="tanya-chat-subtitle">Tanya apa aja soal resep ini.</div>
-               </div>
-               <button className="tanya-close-btn" onClick={() => setIsTanyaOpen(false)}>
-                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-               </button>
+      {features.ENABLE_AI_ASSISTANT && (
+        <div className={`tanya-floating-container ${isTanyaOpen ? 'open' : ''}`}>
+          
+          {/* Greeting Bubble */}
+          {!isTanyaOpen && showGreeting && (
+            <div className="tanya-greeting-bubble animate-slide-up">
+              Hai, ada yang bisa Racikin bantu?
+              <button className="close-greeting" onClick={(e) => { e.stopPropagation(); setShowGreeting(false); }}>✕</button>
             </div>
-            
-            <div className="tanya-chat-body" ref={chatBodyRef}>
-               {messages.map((msg) => (
-                 <div key={msg.id} className={`chat-message ${msg.role}`}>
-                   <div className="chat-bubble">
-                     {msg.content}
-                   </div>
-                 </div>
-               ))}
+          )}
 
-               {isAiLoading && (
-                 <div className="chat-message assistant">
-                   <div className="chat-bubble loading-bubble">
-                     <div className="typing-dots">
-                       <span></span><span></span><span></span>
+          {isTanyaOpen && (
+            <div className="tanya-chat-window shadow-xl animate-scale-in">
+              <div className="tanya-chat-header">
+                 <div className="tanya-header-left">
+                   <div className="tanya-chat-title">
+                      <span className="sparkles-icon">✨</span>
+                      Tanya Racikin
+                   </div>
+                   <div className="tanya-chat-subtitle">Tanya apa aja soal resep ini.</div>
+                 </div>
+                 <button className="tanya-close-btn" onClick={() => setIsTanyaOpen(false)}>
+                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                 </button>
+              </div>
+              
+              <div className="tanya-chat-body" ref={chatBodyRef}>
+                 {messages.map((msg) => (
+                   <div key={msg.id} className={`chat-message ${msg.role}`}>
+                     <div className="chat-bubble">
+                       {msg.content}
                      </div>
                    </div>
-                 </div>
-               )}
-            </div>
+                 ))}
 
-            <div className="tanya-chat-footer">
-              <div className="tanya-quick-chips-scroll">
-                {quickQuestions.map((q, i) => (
-                  <button key={i} className="chip-btn" onClick={() => handleAiAsk(q)} disabled={isAiLoading}>
-                    {q}
-                  </button>
-                ))}
+                 {isAiLoading && (
+                   <div className="chat-message assistant">
+                     <div className="chat-bubble loading-bubble">
+                       <div className="typing-dots">
+                         <span></span><span></span><span></span>
+                       </div>
+                     </div>
+                   </div>
+                 )}
               </div>
-              <form className="tanya-chat-form" onSubmit={(e) => { e.preventDefault(); handleAiAsk(); }}>
-                <input
-                  ref={aiInputRef}
-                  type="text"
-                  value={aiQuestion}
-                  onChange={(e) => setAiQuestion(e.target.value)}
-                  placeholder="Ketik pertanyaanmu..."
-                  disabled={isAiLoading}
-                />
-                <button type="submit" disabled={isAiLoading || !aiQuestion.trim()} className="send-btn">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
 
-        {!isTanyaOpen && (
-          <button className="tanya-circle-fab" onClick={() => { setIsTanyaOpen(true); setShowGreeting(false); }}>
-             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>
-          </button>
-        )}
-      </div>
+              <div className="tanya-chat-footer">
+                <div className="tanya-quick-chips-scroll">
+                  {quickQuestions.map((q, i) => (
+                    <button key={i} className="chip-btn" onClick={() => handleAiAsk(q)} disabled={isAiLoading}>
+                      {q}
+                    </button>
+                  ))}
+                </div>
+                <form className="tanya-chat-form" onSubmit={(e) => { e.preventDefault(); handleAiAsk(); }}>
+                  <input
+                    ref={aiInputRef}
+                    type="text"
+                    value={aiQuestion}
+                    onChange={(e) => setAiQuestion(e.target.value)}
+                    placeholder="Ketik pertanyaanmu..."
+                    disabled={isAiLoading}
+                  />
+                  <button type="submit" disabled={isAiLoading || !aiQuestion.trim()} className="send-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {!isTanyaOpen && (
+            <button className="tanya-circle-fab" onClick={() => { setIsTanyaOpen(true); setShowGreeting(false); }}>
+               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>
+            </button>
+          )}
+        </div>
+      )}
 
       {showAuthModal && (
         <AuthModal

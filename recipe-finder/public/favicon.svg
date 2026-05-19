@@ -1,18 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 36 36">
-  <!-- Custom R with mixing-motion curved leg -->
+  <!-- Bowl / Mortar base -->
   <path
-    d="M10 6 L10 30 M10 6 L20 6 Q27 6 27 13 Q27 19 20 19.5 L10 19.5 M16 19.5 Q20 22 24 30"
+    d="M 8 18 Q 8 28 18 28 Q 28 28 28 18"
     fill="none"
-    stroke="#172033"
+    stroke="#0F172A"
     stroke-width="3.2"
     stroke-linecap="round"
-    stroke-linejoin="round"
   />
-  <!-- Green leaf accent -->
+  <!-- Mixing swirl / steam -->
   <path
-    d="M26 4 Q30 2 31 6 Q29 8 26 7 Q25 5.5 26 4Z"
-    fill="#10b981"
+    d="M 13 18 C 13 8 23 14 23 5"
+    fill="none"
+    stroke="#0F172A"
+    stroke-width="3.2"
+    stroke-linecap="round"
   />
-  <!-- Warm seasoning dot -->
-  <circle cx="28.5" cy="9.5" r="1.2" fill="#f59e0b" opacity="0.75" />
+  <!-- Leaf accent -->
+  <path
+    d="M 25 3 Q 29 1 30 5 Q 28 7 25 5 Z"
+    fill="#10B981"
+  />
+  <!-- Seasoning dot -->
+  <circle cx="10" cy="11" r="1.5" fill="#F59E0B" />
 </svg>

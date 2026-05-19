@@ -109,23 +109,54 @@
 .auth-field input {
   padding: 0.75rem 1rem;
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 0.95rem;
   font-family: inherit;
   color: var(--text-primary);
   background: #f8fafc;
   outline: none;
-  transition: all 0.2s;
+  transition: all 0.2s ease-in-out;
+  width: 100%;
 }
 
 .auth-field input:focus {
-  border-color: var(--accent-color);
+  border-color: #10B981;
   background: white;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
 }
 
 .auth-field input::placeholder {
   color: #94a3b8;
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  padding-right: 2.5rem;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 8px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.password-toggle-btn:hover {
+  color: #475569;
+  background: rgba(15, 23, 42, 0.05);
 }
 
 .auth-error {

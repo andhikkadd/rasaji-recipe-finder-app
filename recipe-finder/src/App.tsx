@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { SearchBar } from './components/SearchBar';
 import { RecipeList } from './components/RecipeList';
@@ -23,6 +23,7 @@ import {
 } from './services/recipeApi';
 import { searchExternalRecipes } from './services/externalSearchService';
 import { Footer } from './components/Footer';
+import { features } from './config/features';
 import { AdminDashboard } from './components/AdminDashboard.tsx';
 import type { Recipe, AiRecipe } from './types';
 import './App.css';
@@ -60,6 +61,20 @@ function HomeView() {
   // Auth modal state
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<'login' | 'register'>('login');
+
+  // User Dropdown state
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const openAuth = useCallback((tab: 'login' | 'register' = 'login') => {
     setAuthModalTab(tab);
@@ -153,16 +168,21 @@ function HomeView() {
     try {
       // Step 1: Internal search
       const internal = await searchRecipes(query);
+      setRecipes(internal);
 
-      // If internal has enough results (>= 5), show immediately
-      if (internal.length >= 5) {
-        setRecipes(internal);
+      // Racikin 1.0: Stop here and don't fallback to AI/External unless explicitly enabled
+      if (!features.ENABLE_EXTERNAL_SEARCH && !features.ENABLE_AI_SEARCH) {
         setSearchStatus('done');
         setIsLoading(false);
         return;
       }
 
-      setRecipes(internal);
+      // If internal has enough results (>= 5), show immediately
+      if (internal.length >= 5) {
+        setSearchStatus('done');
+        setIsLoading(false);
+        return;
+      }
 
       // Step 2: Expand Kitchen Query
       setSearchStatus('expanding_query');
@@ -290,22 +310,29 @@ function HomeView() {
       <header className="app-header">
         <div className="logo-container" onClick={resetToExplore}>
           <svg className="brand-logo-mark" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
-            {/* Custom R with mixing-motion curved leg */}
+            {/* Bowl / Mortar base */}
             <path
-              d="M10 6 L10 30 M10 6 L20 6 Q27 6 27 13 Q27 19 20 19.5 L10 19.5 M16 19.5 Q20 22 24 30"
+              d="M 8 18 Q 8 28 18 28 Q 28 28 28 18"
               fill="none"
-              stroke="#172033"
+              stroke="#0F172A"
               strokeWidth="3.2"
               strokeLinecap="round"
-              strokeLinejoin="round"
             />
-            {/* Small green leaf accent */}
+            {/* Mixing swirl / steam */}
             <path
-              d="M26 4 Q30 2 31 6 Q29 8 26 7 Q25 5.5 26 4Z"
-              fill="#10b981"
+              d="M 13 18 C 13 8 23 14 23 5"
+              fill="none"
+              stroke="#0F172A"
+              strokeWidth="3.2"
+              strokeLinecap="round"
             />
-            {/* Warm seasoning dot */}
-            <circle cx="28.5" cy="9.5" r="1.2" fill="#f59e0b" opacity="0.75" />
+            {/* Leaf accent */}
+            <path
+              d="M 25 3 Q 29 1 30 5 Q 28 7 25 5 Z"
+              fill="#10B981"
+            />
+            {/* Seasoning dot */}
+            <circle cx="10" cy="11" r="1.5" fill="#F59E0B" />
           </svg>
           <h1 className="logo-text">Racik<span className="text-accent">in</span></h1>
         </div>
@@ -324,14 +351,27 @@ function HomeView() {
 
         <div className="auth-section">
           {auth.isLoggedIn ? (
-            <div className="user-menu">
-              <div className="user-avatar">
-                {auth.user?.name.charAt(0).toUpperCase()}
-              </div>
-              <span className="user-name">{auth.user?.name}</span>
-              <button className="auth-nav-btn logout-btn" onClick={auth.logout}>
-                Keluar
+            <div className="user-menu" ref={dropdownRef}>
+              <button 
+                className="user-profile-btn"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              >
+                <div className="user-avatar">
+                  {auth.user?.name.charAt(0).toUpperCase()}
+                </div>
+                <span className="user-name">{auth.user?.name}</span>
+                <svg className={`user-chevron ${isDropdownOpen ? 'open' : ''}`} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
               </button>
+              
+              {isDropdownOpen && (
+                <div className="user-dropdown animate-slide-up-fast">
+                  <button className="dropdown-item">Profil Saya</button>
+                  <button className="dropdown-item">Pengaturan Akun</button>
+                  <button className="dropdown-item" onClick={handleSavedTab}>Resep Tersimpan</button>
+                  <div className="dropdown-divider"></div>
+                  <button className="dropdown-item text-danger" onClick={() => { auth.logout(); setIsDropdownOpen(false); }}>Keluar</button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="auth-buttons">
@@ -347,7 +387,7 @@ function HomeView() {
       </header>
 
       <main className="app-main">
-        {activeTab === 'ai-search' && (
+        {activeTab === 'ai-search' && features.ENABLE_AI_SEARCH && (
           <div className="ai-search-view animate-fade-in">
             <button className="back-btn" onClick={() => setActiveTab('explore')}>← Kembali ke Beranda</button>
             <AiIngredientSearch onSearch={handleAiSearch} isLoading={isAiLoading} />
@@ -377,7 +417,7 @@ function HomeView() {
               placeholder="Cari resep, bahan, atau menu favorit..."
             />
 
-            {!hasSearched && <IngredientCtaCard onClick={() => setActiveTab('ai-search')} />}
+            {!hasSearched && features.ENABLE_AI_SEARCH && <IngredientCtaCard onClick={() => setActiveTab('ai-search')} />}
 
             <div className="category-section">
               <h3 className="category-heading">Lagi pengen masak apa?</h3>
