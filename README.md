@@ -1,63 +1,78 @@
-# Culinary Canvas 🍳
+# Rasaji 🍳
 
-Culinary Canvas is a pristine, minimalist recipe finder application. Discover delicious meals, explore diverse cuisines by region, and save your favorite dishes to easily access them later.
+Rasaji is a modern, minimalist Indonesian recipe finder and cooking assistant. Discover daily meal ideas, filter recipes by category, bookmark your favorite dishes, and utilize a smart AI assistant to brainstorm recipe ideas from ingredients you already have at home.
+
+---
 
 ## ✨ Features
 
-- **Pristine Minimalist Design**: A beautifully crafted light theme with crisp typography and subtle glassmorphism/shadow effects.
-- **Recipe Search**: Instantly find recipes from across the globe by searching for ingredients or dish names.
-- **Region Filtering**: A dynamic, scrollable chip menu that allows you to filter recipes by origin (e.g., Indian, Canadian, Indonesian, etc.).
-- **Popular Recipes**: Automatically presents a curated list of popular recipes upon loading.
-- **Saved Recipes**: Click the heart icon on any recipe to save it to your local browser storage (`localStorage`). Access your favorites anytime in the "Saved" tab.
-- **Detailed Recipe Modal**: View high-quality images, categorical badges, ingredients, exact measurements, step-by-step instructions, and YouTube tutorial links in a clean pop-up modal.
+- **Smart Search**: Find recipes by search queries matching recipe names or key ingredients.
+- **Category Filter**: Effortlessly browse and filter daily menu options through an interactive category chip menu.
+- **AI Ingredient Search**: Enter a list of ingredients from your kitchen, and our AI assistant (powered by Google Gemini) will recommend delicious recipes and outline cooking steps.
+- **User Accounts & Favorites**: Register or sign in to save your favorite recipes (bookmarks) and like recipes permanently. Guests can still save bookmarks locally (`localStorage`).
+- **Admin Dashboard**: A dedicated admin panel (`/admin`) to moderate recipes, review metadata, verify submissions, and manage web scraping or recipe ingestion.
+- **Clean & Responsive UI**: A premium, minimalist light theme with elegant typography, smooth transitions, and hover effects optimized for mobile and desktop viewing.
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 18, Vite, TypeScript, Vanilla CSS.
-- **API**: [TheMealDB](https://www.themealdb.com/)
-- **Deployment & DevOps**: Docker, Nginx, Google Cloud Run, Google Cloud Build (`cloudbuild.yaml` included).
+### Frontend
+- **React 19** & **TypeScript**
+- **Vite** (Next-generation frontend tooling)
+- **React Router Dom** (Client-side routing)
+- **Vanilla CSS** (Custom styling without the overhead of external CSS utility frameworks)
+
+### Backend & Database
+- **Node.js** & **Express.js** (REST API backend)
+- **Prisma ORM** (Database schema management)
+- **SQLite** (`better-sqlite3` for fast local development)
+- **Express Session** & **Bcryptjs** (Secure session-based authentication)
+
+### AI & Data Scraping
+- **Google Gemini API** (Powered by `@google/genai` SDK)
+- **Cheerio** (HTML parsing for custom web scraping scripts)
 
 ---
 
 ## 🚀 Getting Started (Local Development)
 
 ### Prerequisites
-- Node.js (v16 or higher)
-- npm or yarn
+- **Node.js** (v20 or higher recommended)
+- **npm** or **yarn**
 
-### Installation
+### Local Setup Instructions
 
-1. Clone the repository and navigate to the project folder:
-   ```bash
-   cd recipe-finder
-   ```
-2. Install the dependencies:
+1. **Install Dependencies**:
+   Run the installation command directly from the repository root:
    ```bash
    npm install
    ```
-3. Start the Vite development server:
+
+2. **Configure Environment Variables**:
+   Create a `.env` file in the root directory and define the following variables:
+   ```env
+   DATABASE_URL="file:./dev.db"
+   SESSION_SECRET="your_secure_random_session_secret"
+   GEMINI_API_KEY="your_google_ai_studio_gemini_api_key"
+   ```
+
+3. **Initialize the Database**:
+   Push the Prisma schema to create tables locally and run the seeding script:
+   ```bash
+   npx prisma db push
+   node scripts/seed.js
+   ```
+
+4. **Run the Development Server**:
+   Start the local development server (running Vite and the backend Express server concurrently):
    ```bash
    npm run dev
    ```
-4. Open your browser and navigate to `http://localhost:5173`.
+   Open your browser and navigate to `http://localhost:5173`.
 
----
-
-## ☁️ Deployment (Google Cloud Run)
-
-This project is configured for automated CI/CD deployment to **Google Cloud Run** using **Cloud Build** linked to a GitHub repository.
-
-### Manual Setup Instructions:
-
-1. **Push to GitHub**: Commit your code, including the `Dockerfile`, `nginx.conf`, and `cloudbuild.yaml`, and push it to your repository.
-2. **Configure IAM Permissions**: In the Google Cloud Console, ensure your Cloud Build Service Account (ending in `@cloudbuild.gserviceaccount.com`) has the **Cloud Run Admin** and **Service Account User** roles.
-3. **Set up a Trigger**: 
-   - Navigate to **Cloud Build > Triggers**.
-   - Create a new trigger connected to your GitHub repository.
-   - Choose **Cloud Build configuration file (yaml or json)** as the configuration type and point it to the included `cloudbuild.yaml`.
-4. **Deploy**: Push a new commit to your `main` branch to automatically trigger the build, or click **Run** manually in the Cloud Build console.
-
-Once the build is complete, Google Cloud will provide you with a public HTTPS URL to access your deployed application.
-
----
-*Powered by React and TheMealDB.*
+5. **Build for Production**:
+   Compile the frontend production assets:
+   ```bash
+   npm run build
+   ```

@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Recipe {
+  id                     String   @id @default(uuid())
+  slug                   String   @unique
+  title                  String
+  image                  String?
+  category               String   @default("Lainnya")
+  displayBadge           String?
+  shortDescription       String?
+  fullDescription        String?
+  ingredients            String   // JSON array
+  tools                  String?  // JSON array
+  steps                  String   // JSON array
+  tips                   String?
+  alternativeIngredients String?
+  prepTime               String?
+  cookTime               String?
+  cookingTime            String?
+  difficulty             String   @default("Sedang")
+  servings               String?
+  caloriesEstimate       Int      @default(0)
+  tags                   String   // JSON array
+  keywords               String?  // JSON array
+  sourceType             String   @default("internal")
+  sourceUrl              String?  @unique
+  sourceName             String?
+  status                 String   @default("verified")
+  isVerified             Boolean  @default(false)
+  likes                  Int      @default(0)
+  bookmarks              Int      @default(0)
+  views                  Int      @default(0)
+  // Admin review metadata
+  reviewStatus           String?  // pending | approved | rejected | needs_edit
+  reviewNotes            String?  // Admin notes about the review
+  reviewedAt             DateTime?
+  cachedAt               DateTime? // When this external recipe was first cached
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  actions                UserAction[]
+}
+
+model User {
+  id           String       @id @default(uuid())
+  name         String
+  email        String       @unique
+  passwordHash String
+  role         String       @default("user") // user | admin
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  actions      UserAction[]
+}
+
+model UserAction {
+  id        String   @id @default(uuid())
+  userId    String
+  recipeId  String
+  type      String   // like | bookmark
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  recipe    Recipe   @relation(fields: [recipeId], references: [id])
+
+  @@unique([userId, recipeId, type])
+}
+
