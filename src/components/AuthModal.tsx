@@ -1,17 +1,20 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import './AuthModal.css';
 
 interface AuthModalProps {
   onClose: () => void;
-  initialTab?: 'login' | 'register';
+  initialTab?: 'login' | 'register' | 'forgot';
 }
 
 export function AuthModal({ onClose, initialTab = 'login' }: AuthModalProps) {
   const { login, register } = useAuth();
-  const [activeTab, setActiveTab] = useState(initialTab);
+  const { showToast } = useToast();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'forgot'>(initialTab);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
 
   // Form fields
   const [name, setName] = useState('');
@@ -21,32 +24,60 @@ export function AuthModal({ onClose, initialTab = 'login' }: AuthModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
+
+    // Front-end Validations
+    const trimmedEmail = email.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
+      showToast("Format email tidak valid.", "error");
+      setIsLoading(false);
+      return;
+    }
+
+    if (activeTab === 'register') {
+      const trimmedName = name.trim();
+      const nameRegex = /^[a-zA-Z\s.'-]+$/;
+      const hasLetter = /[a-zA-Z]/;
+
+      if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 50 || !hasLetter.test(trimmedName) || !nameRegex.test(trimmedName)) {
+        showToast("Nama harus berisi huruf dan minimal 2 karakter.", "error");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!password || password.length < 6) {
+        showToast("Password baru minimal 6 karakter.", "error");
+        setIsLoading(false);
+        return;
+      }
+    }
 
     try {
       if (activeTab === 'login') {
-        await login(email, password);
+        await login(trimmedEmail, password);
+        showToast("Berhasil masuk.", "success");
       } else {
-        await register(name, email, password);
+        await register(name.trim(), trimmedEmail, password);
+        showToast("Akun berhasil dibuat.", "success");
       }
       onClose();
-    } catch (err: any) {
-      setError(err.message || 'Terjadi kesalahan. Coba lagi.');
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : "Terjadi kesalahan. Coba lagi.";
+      showToast(errMsg, "error");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const switchTab = (tab: 'login' | 'register') => {
+  const switchTab = (tab: 'login' | 'register' | 'forgot') => {
     setActiveTab(tab);
-    setError('');
   };
 
   return (
     <div className="auth-overlay" onClick={onClose}>
       <div className="auth-modal animate-slide-up" onClick={e => e.stopPropagation()}>
-        <button className="auth-close-btn" onClick={onClose}>
+        <button className="auth-close-btn" onClick={onClose} aria-label="Tutup">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
 
@@ -58,29 +89,33 @@ export function AuthModal({ onClose, initialTab = 'login' }: AuthModalProps) {
             <circle cx="10" cy="9" r="2" fill="#F59E0B" />
           </svg>
           <h2 className="auth-title">
-            {activeTab === 'login' ? 'Masuk ke Rasaji' : 'Buat Akun Baru'}
+            {activeTab === 'login' ? 'Masuk ke Rasaji' : activeTab === 'register' ? 'Buat Akun Baru' : 'Lupa Password?'}
           </h2>
           <p className="auth-subtitle">
             {activeTab === 'login'
               ? 'Masuk untuk lanjut explore resep.'
-              : 'Mulai pakai Rasaji dengan akunmu sendiri.'}
+              : activeTab === 'register'
+              ? 'Mulai pakai Rasaji dengan akunmu sendiri.'
+              : 'Pemulihan password belum tersedia otomatis. Silakan hubungi Rasaji lewat halaman Kontak.'}
           </p>
         </div>
 
-        <div className="auth-tabs">
-          <button
-            className={`auth-tab ${activeTab === 'login' ? 'active' : ''}`}
-            onClick={() => switchTab('login')}
-          >
-            Masuk
-          </button>
-          <button
-            className={`auth-tab ${activeTab === 'register' ? 'active' : ''}`}
-            onClick={() => switchTab('register')}
-          >
-            Daftar
-          </button>
-        </div>
+        {activeTab !== 'forgot' && (
+          <div className="auth-tabs">
+            <button
+              className={`auth-tab ${activeTab === 'login' ? 'active' : ''}`}
+              onClick={() => switchTab('login')}
+            >
+              Masuk
+            </button>
+            <button
+              className={`auth-tab ${activeTab === 'register' ? 'active' : ''}`}
+              onClick={() => switchTab('register')}
+            >
+              Daftar
+            </button>
+          </div>
+        )}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           {activeTab === 'register' && (
@@ -137,32 +172,68 @@ export function AuthModal({ onClose, initialTab = 'login' }: AuthModalProps) {
                 )}
               </button>
             </div>
+            {activeTab === 'login' && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2px' }}>
+                <button
+                  type="button"
+                  className="forgot-password-link"
+                  onClick={() => {
+                    setActiveTab('forgot');
+                    showToast("Pemulihan password belum tersedia otomatis.", "info");
+                  }}
+                  style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', cursor: 'pointer', background: 'none', border: 'none', padding: '2px 0' }}
+                >
+                  Lupa password?
+                </button>
+              </div>
+            )}
           </div>
 
-          {error && (
-            <div className="auth-error">
-              <span>⚠️</span> {error}
-            </div>
+          {activeTab !== 'forgot' && (
+            <button type="submit" className="auth-submit-btn" disabled={isLoading}>
+              {isLoading ? (
+                <div className="auth-spinner"></div>
+              ) : activeTab === 'login' ? (
+                'Masuk'
+              ) : (
+                'Daftar Sekarang'
+              )}
+            </button>
           )}
-
-          <button type="submit" className="auth-submit-btn" disabled={isLoading}>
-            {isLoading ? (
-              <div className="auth-spinner"></div>
-            ) : activeTab === 'login' ? (
-              'Masuk'
-            ) : (
-              'Daftar Sekarang'
-            )}
-          </button>
         </form>
 
-        <div className="auth-footer">
-          {activeTab === 'login' ? (
-            <p>Belum punya akun? <button onClick={() => switchTab('register')}>Daftar gratis</button></p>
-          ) : (
-            <p>Sudah punya akun? <button onClick={() => switchTab('login')}>Masuk</button></p>
-          )}
-        </div>
+        {activeTab === 'forgot' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
+            <button 
+              type="button" 
+              className="auth-submit-btn" 
+              onClick={() => {
+                onClose();
+                navigate('/kontak');
+              }}
+            >
+              Hubungi Rasaji
+            </button>
+            
+            <button 
+              type="button" 
+              onClick={() => setActiveTab('login')}
+              style={{ width: '100%', background: 'rgba(15, 23, 42, 0.05)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '12px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'background 0.2s', textAlign: 'center' }}
+            >
+              Kembali ke Login
+            </button>
+          </div>
+        )}
+
+        {activeTab !== 'forgot' && (
+          <div className="auth-footer">
+            {activeTab === 'login' ? (
+              <p>Belum punya akun? <button onClick={() => switchTab('register')}>Daftar gratis</button></p>
+            ) : (
+              <p>Sudah punya akun? <button onClick={() => switchTab('login')}>Masuk</button></p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

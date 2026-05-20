@@ -86,6 +86,17 @@ function getCuratedImage(category, slug) {
   return images[hash % images.length];
 }
 
+function isValidImageUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  const trimmed = url.trim();
+  if (trimmed.length === 0) return false;
+  if (!/^https?:\/\//i.test(trimmed)) return false;
+  const lower = trimmed.toLowerCase();
+  if (lower.includes('placeholder') || lower.includes('broken-image')) return false;
+  return true;
+}
+
+
 function generateEditorialDescription(title, category) {
   const cleanTitle = title.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
   if (category === 'Ayam') {
@@ -178,7 +189,7 @@ async function seed() {
       const titleVal = cleanTitle(r.title);
       const slugVal = slugify(titleVal);
       const catVal = r.category || 'Lainnya';
-      const imageVal = getCuratedImage(catVal, slugVal);
+      const imageVal = isValidImageUrl(r.image) ? r.image.trim() : getCuratedImage(catVal, slugVal);
       
       let descVal = r.shortDescription || '';
       if (!descVal || descVal.startsWith('Bahan utama:') || descVal.length < 15) {
@@ -269,14 +280,22 @@ async function seed() {
   console.log(`\nSeed completed! Upserted ${seeded} sanitized recipes.`);
 
   // Safe cascade delete of invalid entries
+  const cleanupConditions = [
+    { title: { contains: 'Kipas Sederhana', mode: 'insensitive' } },
+    { title: { contains: 'Babi', mode: 'insensitive' } }
+  ];
+
+  if (process.env.RESET_DB === 'true') {
+    console.log('RESET_DB=true detected. Including broad cleanup of external/unverified recipes...');
+    cleanupConditions.push({ status: { not: 'verified' } });
+    cleanupConditions.push({ sourceType: { not: 'internal' } });
+  } else {
+    console.log('Broad database cleanup skipped to preserve user-generated/scraped production data. (Set RESET_DB=true to force a full clean)');
+  }
+
   const badRecipes = await prisma.recipe.findMany({
     where: {
-      OR: [
-        { status: { not: 'verified' } },
-        { sourceType: { not: 'internal' } },
-        { title: { contains: 'Kipas Sederhana' } },
-        { title: { contains: 'Babi' } }
-      ]
+      OR: cleanupConditions
     },
     select: { id: true }
   });

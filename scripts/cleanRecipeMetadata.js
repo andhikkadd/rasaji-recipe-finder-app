@@ -79,6 +79,22 @@ function getCuratedImage(category, slug) {
   return images[hash % images.length];
 }
 
+function resolveRecipeImage(existingImage, category, slug) {
+  if (existingImage && typeof existingImage === 'string') {
+    const trimmed = existingImage.trim();
+    if (trimmed.length > 0 && /^https?:\/\//i.test(trimmed)) {
+      // If it is NOT one of our generic category images, we preserve it!
+      const isGeneric = Object.values(CATEGORY_IMAGES).flat().some(img => trimmed.startsWith(img.split('?')[0]));
+      if (!isGeneric) {
+        return trimmed;
+      }
+    }
+  }
+  // Otherwise, use the curated category placeholder
+  return getCuratedImage(category, slug);
+}
+
+
 function removeTitleDuplicates(title) {
   let t = title.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
   
@@ -380,7 +396,7 @@ async function main() {
     const cleanedIngredients = sanitizeIngredients(ingArr);
     const cleanedSteps = sanitizeSteps(stepArr);
     const cleanedTools = toolArr.map(t => sanitizeListItem(t)).filter(Boolean);
-    const imageVal = getCuratedImage(r.category, finalSlug);
+    const imageVal = resolveRecipeImage(r.image, r.category, finalSlug);
 
     try {
       await prisma.recipe.update({

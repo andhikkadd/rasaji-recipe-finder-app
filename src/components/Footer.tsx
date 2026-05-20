@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import './Footer.css';
 
@@ -16,13 +17,13 @@ export function Footer() {
           </div>
 
           <div className="footer-links">
-            <a href="#" onClick={(e) => e.preventDefault()} className="footer-link">Tentang</a>
+            <Link to="/tentang" className="footer-link">Tentang</Link>
             <span className="footer-dot">·</span>
-            <a href="#" onClick={(e) => e.preventDefault()} className="footer-link">Kontak</a>
+            <Link to="/kontak" className="footer-link">Kontak</Link>
             <span className="footer-dot">·</span>
-            <a href="#" onClick={(e) => e.preventDefault()} className="footer-link">Bantuan</a>
+            <Link to="/bantuan" className="footer-link">Bantuan</Link>
             <span className="footer-dot">·</span>
-            <a href="#" onClick={(e) => e.preventDefault()} className="footer-link">Privasi</a>
+            <Link to="/privasi" className="footer-link">Privasi</Link>
             {user?.role === 'admin' && (
               <>
                 <span className="footer-dot">·</span>

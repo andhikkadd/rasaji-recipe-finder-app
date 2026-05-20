@@ -90,19 +90,35 @@ async function requireAdmin(req, res, next) {
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Nama, email, dan password wajib diisi.' });
+    
+    // Trim and validate name
+    const trimmedName = (name || '').trim();
+    const nameRegex = /^[a-zA-Z\s.'-]+$/;
+    const hasLetter = /[a-zA-Z]/;
+    
+    if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 50 || !hasLetter.test(trimmedName) || !nameRegex.test(trimmedName)) {
+      return res.status(400).json({ error: "Nama harus berisi huruf dan minimal 2 karakter." });
     }
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password minimal 6 karakter.' });
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      return res.status(400).json({ error: "Format email tidak valid." });
     }
+
+    // Validate password
+    if (!password || password.length < 6) {
+      return res.status(400).json({ error: "Password minimal 6 karakter." });
+    }
+
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      return res.status(409).json({ error: 'Email sudah terdaftar. Coba masuk.' });
+      return res.status(409).json({ error: "Email sudah terdaftar. Coba masuk." });
     }
+
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { name, email, passwordHash, role: 'user' },
+      data: { name: trimmedName, email, passwordHash, role: 'user' },
     });
     // Auto-login after register
     req.session.userId = user.id;
@@ -111,7 +127,7 @@ app.post('/api/auth/register', async (req, res) => {
     });
   } catch (error) {
     console.error('Register error:', error);
-    res.status(500).json({ error: 'Gagal mendaftar. Coba lagi.' });
+    res.status(500).json({ error: 'Registrasi gagal. Coba lagi.' });
   }
 });
 
@@ -124,19 +140,23 @@ app.post('/api/auth/login', async (req, res) => {
     }
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return res.status(401).json({ error: 'Email atau password salah.' });
+      return res.status(404).json({ error: "Email belum terdaftar." });
     }
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
-      return res.status(401).json({ error: 'Email atau password salah.' });
+      return res.status(401).json({ error: "Password salah." });
     }
     req.session.userId = user.id;
     res.json({
-      id: user.id, name: user.name, email: user.email, role: user.role,
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatarUrl: user.avatarUrl,
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Gagal masuk. Coba lagi.' });
+    res.status(500).json({ error: "Login belum berhasil. Coba lagi sebentar." });
   }
 });
 
@@ -146,6 +166,94 @@ app.post('/api/auth/logout', (req, res) => {
     res.clearCookie('connect.sid');
     res.json({ success: true });
   });
+});
+
+// Change Password
+app.patch('/api/auth/change-password', async (req, res) => {
+  if (!req.userId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+    if (!currentPassword) {
+      return res.status(400).json({ error: "Password lama wajib diisi." });
+    }
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: "Password baru minimal 6 karakter." });
+    }
+    if (newPassword !== confirmNewPassword) {
+      return res.status(400).json({ error: "Konfirmasi password tidak sama." });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: req.userId } });
+    if (!user) {
+      return res.status(404).json({ error: "User tidak ditemukan." });
+    }
+
+    const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!valid) {
+      return res.status(400).json({ error: "Password lama tidak sesuai." });
+    }
+
+    const samePassword = await bcrypt.compare(newPassword, user.passwordHash);
+    if (samePassword) {
+      return res.status(400).json({ error: "Password baru harus berbeda dengan password lama." });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: req.userId },
+      data: { passwordHash },
+    });
+
+    res.json({ message: "Password berhasil diperbarui." });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ error: 'Gagal memperbarui password.' });
+  }
+});
+
+// Update Profile (Name)
+app.patch('/api/auth/profile', async (req, res) => {
+  if (!req.userId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+    const { name, avatarUrl } = req.body;
+    const updateData = {};
+
+    if (name !== undefined) {
+      const trimmedName = (name || '').trim();
+      const nameRegex = /^[a-zA-Z\s.'-]+$/;
+      const hasLetter = /[a-zA-Z]/;
+      
+      if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 50 || !hasLetter.test(trimmedName) || !nameRegex.test(trimmedName)) {
+        return res.status(400).json({ error: "Nama harus berisi huruf dan minimal 2 karakter." });
+      }
+      updateData.name = trimmedName;
+    }
+
+    if (avatarUrl !== undefined) {
+      updateData.avatarUrl = avatarUrl;
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: req.userId },
+      data: updateData,
+    });
+
+    res.json({
+      id: updated.id,
+      name: updated.name,
+      email: updated.email,
+      role: updated.role,
+      avatarUrl: updated.avatarUrl,
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ error: 'Gagal memperbarui profil.' });
+  }
 });
 
 // Get current user
@@ -164,8 +272,14 @@ app.get('/api/auth/me', async (req, res) => {
     const likedIds = actions.filter(a => a.type === 'like').map(a => a.recipeId);
     const bookmarkedIds = actions.filter(a => a.type === 'bookmark').map(a => a.recipeId);
     res.json({
-      id: user.id, name: user.name, email: user.email, role: user.role,
-      likedIds, bookmarkedIds,
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatarUrl: user.avatarUrl,
+      createdAt: user.createdAt,
+      likedIds,
+      bookmarkedIds,
     });
   } catch (error) {
     console.error('Me error:', error);

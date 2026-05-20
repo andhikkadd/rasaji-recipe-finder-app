@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 
@@ -6,6 +7,8 @@ export interface User {
   name: string;
   email: string;
   role: 'user' | 'admin';
+  avatarUrl?: string | null;
+  createdAt?: string;
   likedIds: string[];
   bookmarkedIds: string[];
 }
@@ -43,7 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Fetch session on mount
   useEffect(() => {
     fetch('/api/auth/me', { credentials: 'include' })
-      .then(r => r.json())
+      .then(async r => {
+        const text = await r.text();
+        return text ? JSON.parse(text) : null;
+      })
       .then(data => {
         if (data && data.id) {
           setUser(data);
@@ -60,11 +66,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       credentials: 'include',
       body: JSON.stringify({ email, password }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Login gagal');
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : null;
+    if (!res.ok) throw new Error(data?.error || 'Login gagal');
     // Fetch full user data with likedIds/bookmarkedIds
     const meRes = await fetch('/api/auth/me', { credentials: 'include' });
-    const me = await meRes.json();
+    const meText = await meRes.text();
+    const me = meText ? JSON.parse(meText) : null;
     setUser(me);
   }, []);
 
@@ -75,25 +83,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       credentials: 'include',
       body: JSON.stringify({ name, email, password }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Registrasi gagal');
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : null;
+    if (!res.ok) throw new Error(data?.error || 'Registrasi gagal');
     // Fetch full user data
     const meRes = await fetch('/api/auth/me', { credentials: 'include' });
-    const me = await meRes.json();
+    const meText = await meRes.text();
+    const me = meText ? JSON.parse(meText) : null;
     setUser(me);
   }, []);
 
   const logout = useCallback(async () => {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    const res = await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : null;
+    if (!res.ok) throw new Error(data?.error || 'Logout gagal');
     setUser(null);
   }, []);
 
   const refreshUser = useCallback(async () => {
     try {
       const res = await fetch('/api/auth/me', { credentials: 'include' });
-      const data = await res.json();
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : null;
       if (data && data.id) setUser(data);
-    } catch {}
+    } catch (error) {
+      console.warn('Failed to refresh user session:', error);
+    }
   }, []);
 
   const hasLiked = useCallback((recipeId: string) => {

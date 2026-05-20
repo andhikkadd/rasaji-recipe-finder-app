@@ -2,7 +2,15 @@ import type { Recipe } from '../types';
 
 const API = '/api/admin';
 
-export async function getReviewStats(): Promise<any> {
+export interface ReviewStats {
+  total: number;
+  verified: number;
+  scraped: number;
+  cached_unverified: number;
+  rejected: number;
+}
+
+export async function getReviewStats(): Promise<ReviewStats> {
   const res = await fetch(`${API}/stats`, { credentials: 'include' });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();

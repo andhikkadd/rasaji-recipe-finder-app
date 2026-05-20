@@ -11,6 +11,7 @@ export async function generateRecipeIdeasFromIngredients(
   ingredients: string[],
   _preference: string | null
 ): Promise<AiRecipe[]> {
+  void _preference;
   if (AI_PROVIDER === 'gemini' && GEMINI_API_KEY) {
     // Future: Call Gemini API
     // const prompt = `Given these ingredients: ${ingredients.join(', ')},

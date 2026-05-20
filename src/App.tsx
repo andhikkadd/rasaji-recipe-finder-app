@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+/* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
+import { useState, useEffect, useCallback } from 'react';
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { SearchBar } from './components/SearchBar';
 import { RecipeList } from './components/RecipeList';
 import { RecipePreviewModal } from './components/RecipePreviewModal';
@@ -25,11 +26,24 @@ import { searchExternalRecipes } from './services/externalSearchService';
 import { Footer } from './components/Footer';
 import { features } from './config/features';
 import { AdminDashboard } from './components/AdminDashboard.tsx';
+import { Navbar } from './components/Navbar';
+import { ScrollToTop } from './components/ScrollToTop';
+import { TentangPage } from './pages/TentangPage';
+import { KontakPage } from './pages/KontakPage';
+import { BantuanPage } from './pages/BantuanPage';
+import { PrivasiPage } from './pages/PrivasiPage';
 import type { Recipe, AiRecipe } from './types';
+import { ProfilPage } from './pages/ProfilPage';
+import { PengaturanAkunPage } from './pages/PengaturanAkunPage';
+import { ToastProvider, useToast } from './contexts/ToastContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import './App.css';
 
 function HomeView() {
   const auth = useAuth();
+  const { showToast } = useToast();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,19 +76,7 @@ function HomeView() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<'login' | 'register'>('login');
 
-  // User Dropdown state
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const openAuth = useCallback((tab: 'login' | 'register' = 'login') => {
     setAuthModalTab(tab);
@@ -107,6 +109,7 @@ function HomeView() {
 
   const handleToggleLike = useCallback((recipe: Recipe) => {
     if (!auth.isLoggedIn) {
+      showToast("Masuk dulu untuk menyimpan resep.", "error");
       openAuth('login');
       return;
     }
@@ -121,6 +124,7 @@ function HomeView() {
 
   const handleToggleBookmark = useCallback((recipe: Recipe) => {
     if (!auth.isLoggedIn) {
+      showToast("Masuk dulu untuk menyimpan resep.", "error");
       openAuth('login');
       return;
     }
@@ -289,16 +293,7 @@ function HomeView() {
     }, 80);
   }, []);
 
-  const handleLogoClick = useCallback(async () => {
-    if (activeTab === 'explore' && !hasSearched && !selectedCategory) {
-      const hero = document.getElementById('home-hero');
-      if (hero) {
-        hero.scrollIntoView({ behavior: 'smooth' });
-      }
-    } else {
-      await resetToExplore();
-    }
-  }, [activeTab, hasSearched, selectedCategory, resetToExplore]);
+
 
   const handleSavedTab = useCallback(() => {
     if (!auth.isLoggedIn) {
@@ -307,6 +302,17 @@ function HomeView() {
     }
     setActiveTab('saved');
   }, [auth, openAuth]);
+
+  useEffect(() => {
+    const state = location.state as { activeTab?: string } | null;
+    if (state && state.activeTab) {
+      const tab = state.activeTab;
+      if (tab === 'explore') resetToExplore();
+      else if (tab === 'popular') handlePopularTab();
+      else if (tab === 'saved') handleSavedTab();
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, resetToExplore, handlePopularTab, handleSavedTab, navigate]);
 
   const handleAiSearch = async (ingredients: string[]) => {
     setIsAiLoading(true);
@@ -326,69 +332,14 @@ function HomeView() {
 
   return (
     <>
-      <header className="app-header">
-        <div className="logo-container" onClick={handleLogoClick}>
-          <svg className="brand-logo-mark" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-            {/* Fluid Bowl */}
-            <path d="M 6 15 C 6 25 26 25 26 15" fill="none" stroke="#0F172A" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
-            {/* Mixing Swirl */}
-            <path d="M 12 18 C 10 12 14 6 20 7" fill="none" stroke="#0F172A" strokeWidth="3.5" strokeLinecap="round" />
-            {/* Leaf Accent */}
-            <path d="M 20 7 Q 24 3 27 7 Q 23 11 20 7 Z" fill="#10B981" />
-            {/* Warm Seasoning Dot */}
-            <circle cx="10" cy="9" r="2" fill="#F59E0B" />
-          </svg>
-          <h1 className="logo-text">Rasa<span className="text-accent">j</span>i</h1>
-        </div>
-
-        <div className="nav-tabs">
-          <button className={`nav-tab ${activeTab === 'explore' ? 'active' : ''}`} onClick={resetToExplore}>
-            Eksplor
-          </button>
-          <button className={`nav-tab ${activeTab === 'popular' ? 'active' : ''}`} onClick={handlePopularTab}>
-            Populer
-          </button>
-          <button className={`nav-tab ${activeTab === 'saved' ? 'active' : ''}`} onClick={handleSavedTab}>
-            Tersimpan ({savedRecipeIds.length})
-          </button>
-        </div>
-
-        <div className="auth-section">
-          {auth.isLoggedIn ? (
-            <div className="user-menu" ref={dropdownRef}>
-              <button 
-                className="user-profile-btn"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              >
-                <div className="user-avatar">
-                  {auth.user?.name.charAt(0).toUpperCase()}
-                </div>
-                <span className="user-name">{auth.user?.name}</span>
-                <svg className={`user-chevron ${isDropdownOpen ? 'open' : ''}`} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-              </button>
-              
-              {isDropdownOpen && (
-                <div className="user-dropdown animate-slide-up-fast">
-                  <button className="dropdown-item">Profil Saya</button>
-                  <button className="dropdown-item">Pengaturan Akun</button>
-                  <button className="dropdown-item" onClick={handleSavedTab}>Resep Tersimpan</button>
-                  <div className="dropdown-divider"></div>
-                  <button className="dropdown-item text-danger" onClick={() => { auth.logout(); setIsDropdownOpen(false); }}>Keluar</button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="auth-buttons">
-              <button className="auth-nav-btn login-btn" onClick={() => openAuth('login')}>
-                Masuk
-              </button>
-              <button className="auth-nav-btn register-btn" onClick={() => openAuth('register')}>
-                Daftar
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
+      <Navbar
+        activeTab={activeTab}
+        onTabChange={(tab) => {
+          if (tab === 'explore') resetToExplore();
+          else if (tab === 'popular') handlePopularTab();
+          else if (tab === 'saved') handleSavedTab();
+        }}
+      />
 
       <main className="app-main">
         {activeTab === 'ai-search' && features.ENABLE_AI_SEARCH && (
@@ -525,6 +476,12 @@ function AppRoutes() {
             <Route path="/" element={<HomeView />} />
             <Route path="/resep/:slug" element={<RecipeFullPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/tentang" element={<TentangPage />} />
+            <Route path="/kontak" element={<KontakPage />} />
+            <Route path="/bantuan" element={<BantuanPage />} />
+            <Route path="/privasi" element={<PrivasiPage />} />
+            <Route path="/profil" element={<ProtectedRoute element={<ProfilPage />} />} />
+            <Route path="/pengaturan-akun" element={<ProtectedRoute element={<PengaturanAkunPage />} />} />
           </Routes>
         </div>
       </main>
@@ -535,11 +492,14 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <ScrollToTop />
+          <AppRoutes />
+        </BrowserRouter>
+      </AuthProvider>
+    </ToastProvider>
   );
 }
 

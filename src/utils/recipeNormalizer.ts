@@ -55,7 +55,7 @@ export function cleanRecipeTitle(title: string): string {
   // e.g., "331. Ikan Bakar" -> "Ikan Bakar"
   // "12 Resep Ayam Kecap" -> "Ayam Kecap"
   // "Resep Ayam Geprek" -> "Ayam Geprek"
-  let cleaned = title.replace(/^[\d\s\.]*(?:Resep\s+)?/i, '').trim();
+  const cleaned = title.replace(/^[\d\s.]*(?:Resep\s+)?/i, '').trim();
   
   // If it ended up empty, fallback to original
   return cleaned || title;
@@ -66,7 +66,7 @@ export function cleanRecipeStep(step: string): string {
   // Match "Step 1:", "Langkah 1:", "01 ", "1. ", "01 1 " at the beginning
   // We use a loop or global replace to catch repeating prefixes just in case
   let cleaned = step;
-  const regex = /^(?:(?:step|langkah)\s*\d+[\.\:\-]*\s*|[\d\.\-\s]+)+/i;
+  const regex = /^(?:(?:step|langkah)\s*\d+[.:-]*\s*|[\d.\s-]+)+/i;
   cleaned = cleaned.replace(regex, '').trim();
 
   // If it ended up empty (e.g. step was just "1"), fallback
@@ -78,10 +78,10 @@ export function cleanIngredientText(ingredient: string): string {
   let cleaned = ingredient;
   
   // Remove leading bullets or dashes
-  cleaned = cleaned.replace(/^[•\-\*\s]+/, '');
+  cleaned = cleaned.replace(/^[•*\s-]+/, '');
   
   // Remove leading numbering like "1. ", "2) " but careful not to remove "2 ekor ikan"
-  cleaned = cleaned.replace(/^\d+[\.\)]\s+/, '');
+  cleaned = cleaned.replace(/^\d+[.)]\s+/, '');
   
   return cleaned.trim() || ingredient;
 }
@@ -89,8 +89,8 @@ export function cleanIngredientText(ingredient: string): string {
 export function cleanTipsText(tip: string): string {
   if (!tip) return '';
   let cleaned = tip;
-  cleaned = cleaned.replace(/^[•\-\*\s]+/, '');
-  cleaned = cleaned.replace(/^\d+[\.\)]\s+/, '');
+  cleaned = cleaned.replace(/^[•*\s-]+/, '');
+  cleaned = cleaned.replace(/^\d+[.)]\s+/, '');
   return cleaned.trim() || tip;
 }
 

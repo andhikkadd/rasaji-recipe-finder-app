@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect, react-hooks/purity */
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import type { Recipe } from '../types';
@@ -38,11 +39,11 @@ export function RecipeFullPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<'login' | 'register'>('login');
 
-  const [guestLikes, _setGuestLikes] = useState<string[]>(() => {
+  const [guestLikes] = useState<string[]>(() => {
     const saved = localStorage.getItem('rasaji_likes');
     return saved ? JSON.parse(saved) : [];
   });
-  const [guestBookmarks, _setGuestBookmarks] = useState<string[]>(() => {
+  const [guestBookmarks] = useState<string[]>(() => {
     const saved = localStorage.getItem('rasaji_bookmarks');
     return saved ? JSON.parse(saved) : [];
   });
@@ -63,7 +64,7 @@ export function RecipeFullPage() {
            const data = await res.json();
            setRecipe(data);
         }
-      } catch (e) {
+      } catch {
         setError('Resep tidak ditemukan.');
       } finally {
         setIsLoading(false);

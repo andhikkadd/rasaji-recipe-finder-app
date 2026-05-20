@@ -1,22 +1,18 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getReviewStats, getReviewRecipes, approveRecipe, rejectRecipe, deleteRecipe, updateRecipe } from '../services/adminApi';
+import type { ReviewStats } from '../services/adminApi';
 import { normalizeRecipe } from '../utils/recipeNormalizer';
 import type { Recipe } from '../types';
 import './AdminDashboard.css';
 
 export function AdminDashboard() {
   const { user, isLoading } = useAuth();
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<ReviewStats | null>(null);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [activeTab, setActiveTab] = useState<string>('needs_review'); // 'needs_review', 'scraped', 'cached_unverified', 'verified', 'rejected', 'all'
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-
-  useEffect(() => {
-    if (user?.role === 'admin') {
-      loadData(activeTab);
-    }
-  }, [user, activeTab]);
 
   const loadData = async (tab: string) => {
     try {
@@ -25,10 +21,16 @@ export function AdminDashboard() {
 
       const recipeData = await getReviewRecipes(tab === 'needs_review' || tab === 'all' ? '' : tab);
       setRecipes(recipeData);
-    } catch (e) {
-      console.error(e);
+    } catch {
+      console.error('Failed to load review data');
     }
   };
+
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      loadData(activeTab);
+    }
+  }, [user, activeTab]);
 
   if (isLoading) return <div className="admin-message">Memuat...</div>;
   if (!user) return <div className="admin-message">Harap masuk untuk mengakses halaman admin.</div>;
@@ -139,7 +141,7 @@ function AdminReviewModal({ recipe, onClose, onRefresh }: { recipe: Recipe, onCl
         await deleteRecipe(recipe.id);
       }
       onRefresh();
-    } catch (e) {
+    } catch {
       alert('Gagal memproses aksi.');
     }
   };
@@ -162,7 +164,7 @@ function AdminReviewModal({ recipe, onClose, onRefresh }: { recipe: Recipe, onCl
       alert('Berhasil disimpan!');
       setIsEditing(false);
       onRefresh();
-    } catch (e) {
+    } catch {
       alert('Gagal menyimpan.');
     }
   };
