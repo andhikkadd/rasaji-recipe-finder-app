@@ -471,12 +471,38 @@ app.get('/api/recipes/expand', async (req, res) => {
   }
 });
 
+// ─── Saved recipes (auth required) ───────────────────────
+app.get('/api/recipes/saved', async (req, res) => {
+  if (!req.userId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+    const actions = await prisma.userAction.findMany({
+      where: { userId: req.userId, type: 'bookmark' },
+      select: { recipeId: true },
+    });
+    const savedIds = actions.map(a => a.recipeId);
+    const recipes = await prisma.recipe.findMany({
+      where: { id: { in: savedIds }, status: 'verified', sourceType: 'internal' },
+    });
+    res.json(recipes.map(formatRecipe));
+  } catch (error) {
+    console.error('Saved recipes error:', error);
+    res.status(500).json({ error: 'Failed to fetch saved recipes' });
+  }
+});
+
 // ─── Popular recipes ──────────────────────────────────────
 app.get('/api/recipes/popular', async (req, res) => {
   try {
     const recipes = await prisma.recipe.findMany({
       where: { status: 'verified', sourceType: 'internal' },
-      orderBy: [{ likes: 'desc' }, { views: 'desc' }],
+      orderBy: [
+        { likes: 'desc' },
+        { bookmarks: 'desc' },
+        { views: 'desc' },
+        { createdAt: 'desc' }
+      ],
       take: 50,
     });
     res.json(recipes.map(formatRecipe));

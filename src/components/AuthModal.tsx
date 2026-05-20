@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { RasajiLogo } from './RasajiLogo';
 import './AuthModal.css';
 
 interface AuthModalProps {
@@ -82,12 +83,9 @@ export function AuthModal({ onClose, initialTab = 'login' }: AuthModalProps) {
         </button>
 
         <div className="auth-header">
-          <svg className="auth-brand-mark" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" width="40" height="40" style={{ margin: '0 auto 0.5rem auto', display: 'block' }}>
-            <path d="M 6 15 C 6 25 26 25 26 15" fill="none" stroke="#0F172A" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M 12 18 C 10 12 14 6 20 7" fill="none" stroke="#0F172A" strokeWidth="3.5" strokeLinecap="round" />
-            <path d="M 20 7 Q 24 3 27 7 Q 23 11 20 7 Z" fill="#10B981" />
-            <circle cx="10" cy="9" r="2" fill="#F59E0B" />
-          </svg>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
+            <RasajiLogo showWordmark={false} size={48} className="auth-brand-mark" />
+          </div>
           <h2 className="auth-title">
             {activeTab === 'login' ? 'Masuk ke Rasaji' : activeTab === 'register' ? 'Buat Akun Baru' : 'Lupa Password?'}
           </h2>

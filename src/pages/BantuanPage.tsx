@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { InfoPageLayout } from '../components/InfoPageLayout';
+import { PageShell } from '../components/PageLayout';
 
 interface FaqItem {
   id: string;
@@ -151,12 +151,13 @@ export function BantuanPage() {
   const totalMatches = filteredGroups.reduce((acc, curr) => acc + curr.items.length, 0);
 
   return (
-    <InfoPageLayout
-      title="Pusat Bantuan Rasaji"
+    <PageShell
+      title="Pusat Bantuan"
       subtitle="Temukan panduan singkat untuk mencari resep, menyimpan menu favorit, dan mengelola akunmu di Rasaji."
+      breadcrumbItems={[{ label: 'Bantuan' }]}
     >
       {/* Search Bar UI */}
-      <div className="help-search-container">
+      <div className="help-search-container" style={{ marginTop: 0 }}>
         <div className="help-search-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
@@ -174,7 +175,7 @@ export function BantuanPage() {
 
       {/* Quick Help Cards */}
       {searchQuery === '' && (
-        <div className="help-cards-grid">
+        <div className="help-cards-grid" style={{ marginTop: '2.5rem' }}>
           <div className="help-card" onClick={() => scrollToElement('menggunakan-rasaji')}>
             <span className="help-card-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -224,7 +225,7 @@ export function BantuanPage() {
       )}
 
       {/* Main FAQ Content Section */}
-      <div className="info-content" style={{ marginTop: searchQuery === '' ? '1.5rem' : '2.5rem' }}>
+      <div className="info-content" style={{ marginTop: searchQuery === '' ? '2.5rem' : '2.5rem' }}>
         {totalMatches === 0 ? (
           <div className="empty-search-state animate-fade-in">
             <span className="empty-search-icon">🔍</span>
@@ -283,7 +284,7 @@ export function BantuanPage() {
       </div>
 
       {/* Contact CTA Section */}
-      <div className="support-cta-section">
+      <div className="support-cta-section" style={{ marginTop: '3.5rem' }}>
         <h3 className="support-cta-title">Masih butuh bantuan?</h3>
         <p className="support-cta-desc">
           Kalau kamu menemukan bug, data resep yang kurang tepat, atau punya saran untuk menyempurnakan Rasaji, 
@@ -297,6 +298,6 @@ export function BantuanPage() {
           </svg>
         </Link>
       </div>
-    </InfoPageLayout>
+    </PageShell>
   );
 }

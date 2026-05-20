@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { InfoPageLayout } from '../components/InfoPageLayout';
+import { PageShell } from '../components/PageLayout';
 import './ProfilPage.css';
 
 export function ProfilPage() {
@@ -21,9 +21,10 @@ export function ProfilPage() {
     : '-';
 
   return (
-    <InfoPageLayout 
+    <PageShell 
       title="Profil Saya" 
-      subtitle="Kelola identitas akunmu dan lihat ringkasan aktivitasmu di Rasaji."
+      subtitle="Lihat ringkasan akun dan aktivitasmu di Rasaji."
+      breadcrumbItems={[{ label: 'Profil Saya' }]}
     >
       <div className="profile-container animate-fade-in">
         
@@ -86,6 +87,6 @@ export function ProfilPage() {
         </div>
 
       </div>
-    </InfoPageLayout>
+    </PageShell>
   );
 }

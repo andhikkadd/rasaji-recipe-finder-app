@@ -1,0 +1,65 @@
+.recipe-actions-minimal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-color);
+  padding-top: 0.85rem;
+  margin-top: auto;
+  width: 100%;
+}
+
+.recipe-actions-minimal.compact {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.action-btn-minimal {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748B; /* Muted Slate */
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0.4rem 0.75rem;
+  border-radius: 50px;
+}
+
+.action-btn-minimal:hover {
+  background: #F1F5F9;
+  color: #10B981; /* Rasaji Green hover */
+  transform: translateY(-1.5px);
+}
+
+.action-btn-minimal svg {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.action-btn-minimal:active svg {
+  transform: scale(0.85);
+}
+
+/* Active states using Rasaji premium green accent */
+.like-btn.active {
+  color: #10B981;
+}
+
+.like-btn.active:hover {
+  background: #ECFDF5;
+}
+
+.save-btn.active {
+  color: #10B981;
+}
+
+.save-btn.active:hover {
+  background: #ECFDF5;
+}
+
+.like-count {
+  font-size: 0.825rem;
+  font-weight: 700;
+  font-family: inherit;
+}

@@ -77,8 +77,20 @@ function normalize(raw: RawRecipe): Recipe {
     sourceName: raw.sourceName || undefined,
     status: (raw.status as RecipeStatus) || 'verified',
     isVerified: raw.isVerified || false,
-    likes: raw.likes || 0,
-    bookmarks: raw.bookmarks || 0,
+    likes: typeof raw.likes === 'number' ? raw.likes : (
+      typeof (raw as any).likesCount === 'number' ? (raw as any).likesCount : (
+        (raw as any)._count && typeof (raw as any)._count.likes === 'number' ? (raw as any)._count.likes : (
+          Array.isArray((raw as any).likedBy) ? (raw as any).likedBy.length : 0
+        )
+      )
+    ),
+    bookmarks: typeof raw.bookmarks === 'number' ? raw.bookmarks : (
+      typeof (raw as any).bookmarksCount === 'number' ? (raw as any).bookmarksCount : (
+        (raw as any)._count && typeof (raw as any)._count.bookmarks === 'number' ? (raw as any)._count.bookmarks : (
+          Array.isArray((raw as any).bookmarkedBy) ? (raw as any).bookmarkedBy.length : 0
+        )
+      )
+    ),
     views: raw.views || 0,
     _isExternalMock: raw._isExternalMock || false,
   };
@@ -197,4 +209,12 @@ export async function cacheExternalRecipe(recipe: Partial<Recipe>): Promise<Reci
 export async function fetchRecipes(query?: string): Promise<Recipe[]> {
   if (query) return searchRecipes(query);
   return getLatestRecipes();
+}
+
+/** Get saved recipes of the user */
+export async function getSavedRecipes(): Promise<Recipe[]> {
+  const res = await fetch(`${API}/recipes/saved`, { credentials: 'include' });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const data = await res.json();
+  return Array.isArray(data) ? data.map(normalize) : [];
 }

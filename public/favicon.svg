@@ -1,10 +1,44 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-  <!-- Fluid Bowl -->
-  <path d="M 6 15 C 6 25 26 25 26 15" fill="none" stroke="#0F172A" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
-  <!-- Mixing Swirl -->
-  <path d="M 12 18 C 10 12 14 6 20 7" fill="none" stroke="#0F172A" stroke-width="3.5" stroke-linecap="round" />
-  <!-- Leaf Accent -->
-  <path d="M 20 7 Q 24 3 27 7 Q 23 11 20 7 Z" fill="#10B981" />
-  <!-- Warm Seasoning Dot -->
-  <circle cx="10" cy="9" r="2" fill="#F59E0B" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="32" height="32" fill="none">
+  <!-- Fresh Garnish Accent (Leaves) — Green -->
+  <path
+    d="M 12 13.5 C 9 9.5 14.5 4.5 18 6.5 C 17 10.5 14.5 13.5 12 13.5 Z"
+    fill="#10B981"
+  />
+  <path
+    d="M 22.5 12 C 21.5 9 24 6 26.5 7 C 25.5 10 23.5 12 22.5 12 Z"
+    fill="#10B981"
+    opacity="0.85"
+  />
+
+  <!-- Taste / Culinary Spark — Golden Orange -->
+  <path
+    d="M 30.5 13.5 Q 30.5 16 33 16 Q 30.5 16 30.5 18.5 Q 30.5 16 28 16 Q 30.5 16 30.5 13.5 Z"
+    fill="#F59E0B"
+  />
+
+  <!-- Premium Spoon — Deep Slate -->
+  <line
+    x1="19.5"
+    y1="21.5"
+    x2="29.5"
+    y2="11.5"
+    stroke="#0F172A"
+    stroke-width="4.5"
+    stroke-linecap="round"
+  />
+  <circle
+    cx="15.5"
+    cy="25.5"
+    r="4.5"
+    fill="#0F172A"
+  />
+
+  <!-- Premium Smooth Bowl — Deep Slate -->
+  <path
+    d="M 6.5 19 C 6.5 30.7 33.5 30.7 33.5 19"
+    stroke="#0F172A"
+    stroke-width="4.5"
+    stroke-linecap="round"
+    fill="none"
+  />
 </svg>

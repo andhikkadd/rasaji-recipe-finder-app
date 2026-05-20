@@ -1,33 +1,17 @@
 import { Link } from 'react-router-dom';
-import { InfoPageLayout } from '../components/InfoPageLayout';
+import { PageShell } from '../components/PageLayout';
 
 export function TentangPage() {
   return (
-    <InfoPageLayout wide={true}>
+    <PageShell 
+      title="Tentang Kami" 
+      subtitle="Rasaji hadir untuk membantu kamu menemukan ide masak harian dengan cara yang lebih rapi, sederhana, dan nyaman."
+      breadcrumbItems={[{ label: 'Tentang' }]}
+    >
       <div className="about-wrapper animate-fade-in">
         
-        {/* 1. Hero Section */}
-        <section className="about-hero">
-          <div className="about-hero-text">
-            <h1 className="about-hero-title">Tentang Rasaji</h1>
-            <p className="about-hero-subtitle">
-              Rasaji hadir untuk membantu kamu menemukan ide masak harian dengan cara yang lebih rapi, sederhana, dan nyaman.
-            </p>
-            <p className="about-hero-intro">
-              Kadang yang paling sulit dari memasak bukan proses memasaknya, tapi menentukan mau masak apa. 
-              Rasaji dibuat sebagai ruang sederhana untuk mencari, membaca, dan menyimpan resep yang ingin kamu coba.
-            </p>
-          </div>
-          
-          <div className="about-hero-visual">
-            <div className="about-blob-shape">
-              <span className="about-blob-inner">🍳</span>
-            </div>
-          </div>
-        </section>
-
-        {/* 2. Main Story Section */}
-        <section className="about-story">
+        {/* 1. Story Section */}
+        <section className="about-story" style={{ marginTop: 0 }}>
           <h2 className="about-section-heading">Kenapa Rasaji dibuat?</h2>
           <p className="about-story-text">
             Rasaji berangkat dari kebiasaan sederhana: ingin masak, tapi bingung mulai dari mana. 
@@ -36,8 +20,8 @@ export function TentangPage() {
           </p>
         </section>
 
-        {/* 3. What Rasaji Helps With (Elegant Feature Cards) */}
-        <section className="about-features-grid">
+        {/* 2. What Rasaji Helps With (Elegant Feature Cards) */}
+        <section className="about-features-grid" style={{ marginTop: '2.5rem' }}>
           
           <div className="about-feature-card">
             <div className="about-feature-icon-wrapper">
@@ -59,9 +43,9 @@ export function TentangPage() {
                 <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
               </svg>
             </div>
-            <h3 className="about-feature-title">Baca resep dengan nyaman</h3>
+            <h3 className="about-feature-title">Bahan & Langkah Terstruktur</h3>
             <p className="about-feature-desc">
-              Setiap resep disusun dengan format yang rapi dan teratur agar bahan serta langkah memasak mudah diikuti.
+              Setiap resep disusun dengan urutan langkah yang mudah dibaca langsung saat kamu berada di dapur.
             </p>
           </div>
 
@@ -71,41 +55,39 @@ export function TentangPage() {
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
               </svg>
             </div>
-            <h3 className="about-feature-title">Simpan menu favorit</h3>
+            <h3 className="about-feature-title">Simpan resep pilihanmu</h3>
             <p className="about-feature-desc">
-              Daftarkan akun untuk menandai resep-resep yang ingin kamu coba kembali di kemudian hari.
+              Simpan resep-resep andalanmu agar bisa kamu akses lagi dengan mudah kapan saja.
             </p>
           </div>
 
         </section>
 
-        {/* 4. Rasaji 1.0 Focus Section */}
-        <section className="about-focus-section">
-          <div className="about-focus-left">
-            <h2 className="about-section-heading">Fokus Rasaji 1.0</h2>
-            <p className="about-focus-desc">
-              Untuk versi awal, Rasaji berfokus sepenuhnya pada pengalaman dasar yang stabil dan andal. 
-              Kami mematangkan fitur-fitur esensial agar kamu bisa langsung berselancar dan memasak dengan lancar.
-            </p>
-          </div>
+        {/* 3. High Focus Principles */}
+        <section className="about-focus-section" style={{ marginTop: '3.5rem' }}>
+          <h2 className="about-section-heading">Fokus Utama Rasaji</h2>
           
-          <div className="about-focus-grid">
+          <div className="about-focus-list">
             <div className="about-focus-item">
               <div className="about-focus-number">1</div>
-              <span className="about-focus-text">Resep terkurasi pilihan</span>
+              <span className="about-focus-text">Kemudahan membaca bumbu dan bahan</span>
             </div>
+            
             <div className="about-focus-item">
               <div className="about-focus-number">2</div>
-              <span className="about-focus-text">Pencarian database internal yang cepat</span>
+              <span className="about-focus-text">Navigasi bersih tanpa iklan yang menutupi langkah masak</span>
             </div>
+
             <div className="about-focus-item">
               <div className="about-focus-number">3</div>
-              <span className="about-focus-text">Detail resep yang nyaman dibaca tanpa iklan</span>
+              <span className="about-focus-text">Pencarian resep pintar yang responsif</span>
             </div>
+
             <div className="about-focus-item">
               <div className="about-focus-number">4</div>
-              <span className="about-focus-text">Penyimpanan resep favorit personal</span>
+              <span className="about-focus-text">Desain bernuansa hangat dan nyaman di mata</span>
             </div>
+
             <div className="about-focus-item">
               <div className="about-focus-number">5</div>
               <span className="about-focus-text">Tampilan responsif di seluruh perangkat</span>
@@ -113,8 +95,8 @@ export function TentangPage() {
           </div>
         </section>
 
-        {/* 5. Data Note / Honesty Section */}
-        <section className="about-data-section">
+        {/* 4. Data Note / Honesty Section */}
+        <section className="about-data-section" style={{ marginTop: '3.5rem' }}>
           <div className="about-data-content">
             <h2 className="about-section-heading" style={{ marginBottom: '0.75rem' }}>Tentang data resep</h2>
             <p className="about-data-desc">
@@ -131,8 +113,8 @@ export function TentangPage() {
           </Link>
         </section>
 
-        {/* 6. CTA Bottom Section */}
-        <section className="about-cta-section">
+        {/* 5. CTA Bottom Section */}
+        <section className="about-cta-section" style={{ marginTop: '3.5rem', marginBottom: 0 }}>
           <h2 className="about-cta-title">Siap cari ide masak hari ini?</h2>
           <p className="about-cta-desc">
             Mulai jelajahi resep dan temukan menu yang paling cocok untuk dapurmu.
@@ -149,6 +131,6 @@ export function TentangPage() {
         </section>
 
       </div>
-    </InfoPageLayout>
+    </PageShell>
   );
 }

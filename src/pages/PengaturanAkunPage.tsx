@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { InfoPageLayout } from '../components/InfoPageLayout';
+import { PageShell } from '../components/PageLayout';
 import './PengaturanAkunPage.css';
 
 export function PengaturanAkunPage() {
@@ -170,7 +170,11 @@ export function PengaturanAkunPage() {
   const initial = user.name ? user.name.charAt(0).toUpperCase() : 'U';
 
   return (
-    <InfoPageLayout title="Pengaturan Akun" subtitle="Perbarui informasi profil dan keamanan akunmu.">
+    <PageShell 
+      title="Pengaturan Akun" 
+      subtitle="Perbarui informasi profil dan keamanan akunmu."
+      breadcrumbItems={[{ label: 'Pengaturan Akun' }]}
+    >
       <div className="settings-container animate-fade-in">
         
         {/* Profile Info Section */}
@@ -335,6 +339,6 @@ export function PengaturanAkunPage() {
         </section>
 
       </div>
-    </InfoPageLayout>
+    </PageShell>
   );
 }

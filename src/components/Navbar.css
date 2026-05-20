@@ -260,26 +260,6 @@
     top: 0.75rem;
   }
 
-  .nav-tabs {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-    gap: 1.25rem;
-    padding-top: 0.25rem;
-    margin-top: 0.15rem;
-  }
-
-  .nav-tab {
-    font-size: 0.9rem;
-    padding: 0.2rem 0;
-  }
-
-  .nav-tab.active::after {
-    bottom: -4px;
-    width: 4px;
-    height: 4px;
-  }
-
   .brand-logo-mark {
     width: 30px;
     height: 30px;
@@ -312,14 +292,6 @@
   .app-header {
     margin: 0.5rem 0.75rem 1.25rem 0.75rem;
     padding: 0.5rem 0.75rem;
-  }
-
-  .nav-tabs {
-    gap: 1rem;
-  }
-
-  .nav-tab {
-    font-size: 0.825rem;
   }
 
   .brand-logo-mark {

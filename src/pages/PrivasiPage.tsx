@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { InfoPageLayout } from '../components/InfoPageLayout';
+import { PageShell } from '../components/PageLayout';
 
 interface Section {
   id: string;
@@ -55,12 +55,12 @@ export function PrivasiPage() {
   };
 
   return (
-    <InfoPageLayout
-      title="Privacy Policy"
-      subtitle="This page explains how Rasaji collects, uses, and protects your personal information when you use our service."
-      wide={true}
+    <PageShell
+      title="Kebijakan Privasi"
+      subtitle="Halaman ini menjelaskan bagaimana Rasaji mengumpulkan, menggunakan, dan melindungi informasi pribadi Anda."
+      breadcrumbItems={[{ label: 'Privasi' }]}
     >
-      <div className="policy-last-updated">
+      <div className="policy-last-updated" style={{ marginTop: 0 }}>
         Last updated: May 20, 2026
       </div>
 
@@ -394,6 +394,6 @@ export function PrivasiPage() {
 
         </div>
       </div>
-    </InfoPageLayout>
+    </PageShell>
   );
 }
