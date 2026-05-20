@@ -1,10 +1,10 @@
 .profile-container {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 28px;
   max-width: 800px;
   margin: 0 auto;
-  padding: 12px 0 40px 0;
+  padding: 0 0 24px 0;
 }
 
 .profile-auth-prompt {
@@ -149,25 +149,32 @@
 
 .profile-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
 }
 
 .stat-card {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 24px;
-  border-radius: 16px;
+  gap: 16px;
+  padding: 20px 22px;
+  border-radius: 22px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #fff;
+}
+
+.stat-card:hover {
+  transform: none;
+  box-shadow: var(--shadow-sm);
 }
 
 .stat-icon-wrapper {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
 }
 
 .stat-icon-wrapper.liked {
@@ -187,15 +194,15 @@
 }
 
 .stat-value {
-  font-size: 1.65rem;
-  font-weight: 700;
+  font-size: 1.35rem;
+  font-weight: 800;
   color: var(--text-primary);
   line-height: 1;
 }
 
 .stat-label {
-  font-size: 0.825rem;
-  color: var(--text-secondary);
+  font-size: 0.92rem;
+  color: #64748B;
   font-weight: 500;
 }
 
@@ -226,6 +233,11 @@
   .profile-edit-btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .profile-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 }
 

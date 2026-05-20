@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { PageShell } from '../components/PageLayout';
+import '../components/InfoPageLayout.css';
 
 export function TentangPage() {
   return (

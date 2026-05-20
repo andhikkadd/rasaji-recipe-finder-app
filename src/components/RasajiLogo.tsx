@@ -33,8 +33,7 @@ export function RasajiLogo({
           display: 'block',
           flexShrink: 0,
           borderRadius: '8px',
-          objectFit: 'contain',
-          transform: 'translateY(-2.5px)'
+          objectFit: 'contain'
         }}
       />
 

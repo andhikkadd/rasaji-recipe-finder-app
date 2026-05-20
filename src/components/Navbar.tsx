@@ -9,13 +9,34 @@ import './Navbar.css';
 interface NavbarProps {
   activeTab?: 'explore' | 'saved' | 'ai-search';
   onTabChange?: (tab: 'explore' | 'saved' | 'ai-search') => void;
+  breadcrumbLabel?: string;
 }
 
-export function Navbar({}: NavbarProps) {
+export function Navbar({ activeTab: _activeTab, onTabChange: _onTabChange, breadcrumbLabel }: NavbarProps) {
   const auth = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Determine the breadcrumb text
+  let finalBreadcrumb = breadcrumbLabel;
+  if (!finalBreadcrumb && location.pathname !== '/') {
+    const routeMap: Record<string, string> = {
+      '/populer': 'Resep Populer',
+      '/tersimpan': 'Resep Tersimpan',
+      '/profil': 'Profil Saya',
+      '/pengaturan-akun': 'Pengaturan Akun',
+      '/tentang': 'Tentang',
+      '/kontak': 'Kontak',
+      '/bantuan': 'Bantuan',
+      '/privasi': 'Privasi',
+    };
+    finalBreadcrumb = routeMap[location.pathname];
+    
+    if (!finalBreadcrumb && location.pathname.startsWith('/resep/')) {
+      finalBreadcrumb = 'Resep';
+    }
+  }
 
   // Auth modal state
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -54,8 +75,16 @@ export function Navbar({}: NavbarProps) {
   return (
     <>
       <header className="app-header">
-        <div className="logo-container" onClick={handleLogoClick}>
-          <RasajiLogo />
+        <div className="navbar-brand-trail">
+          <button className="brand-root" onClick={handleLogoClick}>
+            <RasajiLogo />
+          </button>
+          {finalBreadcrumb && (
+            <>
+              <span className="brand-separator">/</span>
+              <span className="brand-current">{finalBreadcrumb}</span>
+            </>
+          )}
         </div>
 
         <div className="auth-section">

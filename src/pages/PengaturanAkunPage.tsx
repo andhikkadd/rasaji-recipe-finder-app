@@ -5,6 +5,16 @@ import { useToast } from '../contexts/ToastContext';
 import { PageShell } from '../components/PageLayout';
 import './PengaturanAkunPage.css';
 
+async function readJsonSafe(response: Response) {
+  const text = await response.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
 export function PengaturanAkunPage() {
   const { user, refreshUser } = useAuth();
   const { showToast } = useToast();
@@ -51,6 +61,7 @@ export function PengaturanAkunPage() {
     const reader = new FileReader();
     reader.onloadend = () => {
       setAvatar(reader.result as string);
+      showToast("Upload foto permanen belum tersedia.", "info");
     };
     reader.readAsDataURL(file);
   };
@@ -81,23 +92,28 @@ export function PengaturanAkunPage() {
       return;
     }
 
+    // Do not save local data-URL/base64 previews to the DB
+    const isLocalDataUrl = avatar && avatar.startsWith('data:');
+    const finalAvatarUrl = isLocalDataUrl ? user.avatarUrl : avatar;
+
     try {
       const res = await fetch('/api/auth/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: trimmedName, avatarUrl: avatar }),
+        credentials: 'include',
+        body: JSON.stringify({ name: trimmedName, avatarUrl: finalAvatarUrl }),
       });
-      const text = await res.text();
-      const data = text ? JSON.parse(text) : null;
+      
+      const data = await readJsonSafe(res);
 
       if (!res.ok) {
-        throw new Error(data?.error || "Gagal memperbarui profil.");
+        throw new Error(data?.error || "Profil belum berhasil diperbarui.");
       }
 
       await refreshUser();
       showToast("Profil berhasil diperbarui.", "success");
     } catch (err) {
-      const errMsg = err instanceof Error ? err.message : "Gagal memperbarui profil.";
+      const errMsg = err instanceof Error ? err.message : "Profil belum berhasil diperbarui. Coba lagi sebentar.";
       showToast(errMsg, "error");
     } finally {
       setIsUpdatingProfile(false);
@@ -137,14 +153,15 @@ export function PengaturanAkunPage() {
       const res = await fetch('/api/auth/change-password', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           currentPassword,
           newPassword,
           confirmNewPassword,
         }),
       });
-      const text = await res.text();
-      const data = text ? JSON.parse(text) : null;
+      
+      const data = await readJsonSafe(res);
 
       if (!res.ok) {
         throw new Error(data?.error || "Gagal memperbarui password.");
@@ -215,6 +232,17 @@ export function PengaturanAkunPage() {
           </div>
 
           <form onSubmit={handleUpdateProfile} className="settings-form">
+            <div className="settings-field">
+              <label htmlFor="settings-avatar-url">URL Foto Profil (Opsional)</label>
+              <input
+                id="settings-avatar-url"
+                type="text"
+                value={avatar || ''}
+                onChange={(e) => setAvatar(e.target.value || null)}
+                placeholder="Masukkan URL foto profil (misal: https://example.com/foto.jpg)"
+              />
+            </div>
+
             <div className="settings-field">
               <label htmlFor="settings-name">Nama Tampilan</label>
               <input

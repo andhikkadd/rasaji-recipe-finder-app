@@ -1,29 +1,18 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { PageShell } from '../components/PageLayout';
 import { RecipeCard } from '../components/RecipeCard';
 import { RecipePreviewModal } from '../components/RecipePreviewModal';
 import { getSavedRecipes } from '../services/recipeApi';
 import { useAuth } from '../contexts/AuthContext';
-import { useToast } from '../contexts/ToastContext';
 import type { Recipe } from '../types';
 
 export function SavedRecipesPage() {
   const auth = useAuth();
-  const navigate = useNavigate();
-  const { showToast } = useToast();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRecipeForPreview, setSelectedRecipeForPreview] = useState<Recipe | null>(null);
 
   useEffect(() => {
-    // If not logged in and not loading auth, redirect to home with toast
-    if (!auth.isLoading && !auth.isLoggedIn) {
-      navigate('/');
-      showToast('Masuk terlebih dahulu untuk melihat resep tersimpan.', 'error');
-      return;
-    }
-
     if (auth.isLoggedIn) {
       const loadSaved = async () => {
         try {
@@ -37,7 +26,7 @@ export function SavedRecipesPage() {
       };
       loadSaved();
     }
-  }, [auth.isLoggedIn, auth.isLoading, navigate, showToast]);
+  }, [auth.isLoggedIn]);
 
   const handleToggleBookmark = async (recipe: Recipe) => {
     if (!auth.isLoggedIn) return;

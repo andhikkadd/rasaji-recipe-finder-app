@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageShell } from '../components/PageLayout';
+import '../components/InfoPageLayout.css';
 
 interface FaqItem {
   id: string;

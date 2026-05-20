@@ -47,9 +47,9 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle }: PageHeaderProps) {
   return (
-    <header className="page-header-block">
-      <h1 className="page-header-title">{title}</h1>
-      {subtitle && <p className="page-header-subtitle">{subtitle}</p>}
+    <header className="page-header">
+      <h1>{title}</h1>
+      {subtitle && <p>{subtitle}</p>}
     </header>
   );
 }
@@ -62,11 +62,12 @@ interface PageShellProps {
 }
 
 export function PageShell({ children, breadcrumbItems, title, subtitle }: PageShellProps) {
+  const label = breadcrumbItems[breadcrumbItems.length - 1]?.label || title;
+  
   return (
     <div className="page-layout-wrapper">
-      <Navbar />
+      <Navbar breadcrumbLabel={label} />
       <main className="page-shell animate-fade-in">
-        <Breadcrumb items={breadcrumbItems} />
         <PageHeader title={title} subtitle={subtitle} />
         <div className="page-shell-content">
           {children}

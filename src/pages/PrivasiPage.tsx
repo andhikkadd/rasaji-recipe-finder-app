@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { PageShell } from '../components/PageLayout';
+import '../components/InfoPageLayout.css';
 
 interface Section {
   id: string;

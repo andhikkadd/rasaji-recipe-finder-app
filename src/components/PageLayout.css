@@ -7,110 +7,45 @@
 .page-shell {
   width: min(1160px, calc(100% - 48px));
   margin: 0 auto;
-  padding: 42px 0 72px;
+  padding-top: 32px;
+  padding-bottom: 56px;
   box-sizing: border-box;
 }
 
-@media (max-width: 640px) {
-  .page-shell {
-    width: min(100% - 32px, 1160px);
-    padding: 28px 0 56px;
-  }
-}
-
-/* Breadcrumb Navigation styling */
-.breadcrumb-nav {
-  margin-bottom: 16px;
-}
-
-.breadcrumb-list {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  gap: 4px;
-}
-
-.breadcrumb-item {
-  display: flex;
-  align-items: center;
-  font-size: 0.875rem;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-.breadcrumb-link {
-  color: var(--text-secondary);
-  text-decoration: none;
-  transition: color 0.2s ease;
-  font-weight: 600;
-}
-
-.breadcrumb-link.home-link {
-  color: var(--text-primary);
-}
-
-.breadcrumb-link:hover {
-  color: var(--accent-color) !important;
-}
-
-.breadcrumb-separator {
-  color: var(--text-secondary);
-  margin: 0 6px;
-  font-size: 0.9rem;
-  opacity: 0.6;
-  user-select: none;
-}
-
-.breadcrumb-current {
-  color: var(--text-secondary);
-  opacity: 0.75;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 200px;
-}
-
-/* Page Header Block */
-.page-header-block {
-  margin-bottom: 36px;
+.page-header {
+  margin-bottom: 32px;
   text-align: left;
 }
 
-.page-header-title {
-  font-size: 2.25rem;
-  font-weight: 850;
+.page-header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: -0.05em;
   color: var(--text-primary);
-  letter-spacing: -0.03em;
-  margin: 0 0 8px 0;
-  line-height: 1.2;
+  font-weight: 850;
 }
 
-.page-header-subtitle {
-  font-size: 1.05rem;
-  color: var(--text-secondary);
-  margin: 0;
-  line-height: 1.5;
-  max-width: 800px;
+.page-header p {
+  margin-top: 10px;
+  max-width: 620px;
+  color: #64748B;
+  font-size: 1rem;
+  line-height: 1.65;
 }
 
 .page-shell-content {
   width: 100%;
 }
 
-@media (max-width: 768px) {
-  .page-header-title {
-    font-size: 1.75rem;
+@media (max-width: 640px) {
+  .page-shell {
+    width: min(100% - 32px, 1160px);
+    padding-top: 24px;
+    padding-bottom: 44px;
   }
-  
-  .page-header-subtitle {
-    font-size: 0.95rem;
-  }
-  
-  .page-header-block {
+
+  .page-header {
     margin-bottom: 24px;
   }
 }

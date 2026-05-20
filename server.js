@@ -1312,12 +1312,13 @@ app.get('/api/recipes', async (req, res) => {
   }
 });
 
+// ─── API Fallback ─────────────────────────────────────────
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'Endpoint tidak ditemukan.' });
+});
+
 // ─── SPA fallback ─────────────────────────────────────────
 app.use((req, res) => {
-  if (req.path.startsWith('/api')) {
-    return res.status(404).json({ error: 'API route not found' });
-  }
-
   // Return 404 for missing static assets instead of serving index.html
   if (req.path.startsWith('/assets/') || req.path === '/favicon.svg' || req.path === '/site.webmanifest') {
     return res.status(404).send('Not Found');

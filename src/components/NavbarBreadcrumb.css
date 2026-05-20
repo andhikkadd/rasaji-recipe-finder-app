@@ -1,0 +1,52 @@
+.navbar-breadcrumb-trail {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  animation: breadcrumbFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.navbar-breadcrumb-separator {
+  color: #94a3b8; /* subtle muted color */
+  font-weight: 400;
+  font-size: 1.15rem;
+  user-select: none;
+}
+
+.navbar-breadcrumb-current {
+  color: #64748b; /* muted styling for current page */
+  font-weight: 500;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+@media (max-width: 768px) {
+  .navbar-breadcrumb-current {
+    max-width: 100px;
+    font-size: 0.85rem;
+  }
+  .navbar-breadcrumb-separator {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-breadcrumb-current {
+    max-width: 70px;
+    font-size: 0.8rem;
+  }
+}
+
+@keyframes breadcrumbFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

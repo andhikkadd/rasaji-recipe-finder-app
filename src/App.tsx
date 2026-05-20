@@ -124,6 +124,7 @@ function getDailyCategoryHighlights(recipesList: Recipe[]): IntentionCard[] {
 
 import { RecipeFullPage } from './components/RecipeFullPage';
 import { CategoryFilter } from './components/CategoryFilter';
+import { FeaturedRecipeLayout } from './components/FeaturedRecipeLayout';
 import { AiIngredientSearch } from './components/AiIngredientSearch';
 import { AiRecipeCard } from './components/AiRecipeCard';
 import { IngredientCtaCard } from './components/IngredientCtaCard';
@@ -145,7 +146,6 @@ import { Footer } from './components/Footer';
 import { features } from './config/features';
 import { AdminDashboard } from './components/AdminDashboard.tsx';
 import { Navbar } from './components/Navbar';
-import { RecipeActions } from './components/RecipeActions';
 import { ScrollToTop } from './components/ScrollToTop';
 import { TentangPage } from './pages/TentangPage';
 import { KontakPage } from './pages/KontakPage';
@@ -520,9 +520,6 @@ function HomeView() {
   const bookmarkedRecipes = recipes.filter(r => savedRecipeIds.includes(r.id));
 
   // Editorial layout helper variables
-  const featuredRecipe: Recipe | undefined = recipes[0];
-  const highlight1: Recipe | undefined = recipes[1];
-  const highlight2: Recipe | undefined = recipes[2];
   const mainRecipes: Recipe[] = recipes.length >= 3 ? recipes.slice(3) : recipes;
 
   return (
@@ -609,82 +606,14 @@ function HomeView() {
             ) : (
               <>
                 {/* ─── Featured Recipe Section: Pilihan Hari Ini ─── */}
-                {recipes.length >= 3 && (
-                  <div className="featured-section animate-fade-in">
-                    <h3 className="section-title" style={{ margin: 0 }}>Pilihan Hari Ini</h3>
-                    <p className="section-subtitle">Menu yang cocok buat jadi inspirasi masak hari ini.</p>
-
-                    <div className="featured-layout">
-                      {/* Large Featured Card (Left) */}
-                      {featuredRecipe && (
-                        <div className="featured-large-card animate-fade-in" onClick={() => handleRecipeClick(featuredRecipe)}>
-                          <div className="featured-large-img-container">
-                            <img
-                              src={featuredRecipe.image || '/logo.ico'}
-                              alt={featuredRecipe.title}
-                              className="featured-large-img"
-                              loading="lazy"
-                            />
-                            <span className="featured-large-badge">{featuredRecipe.displayBadge || featuredRecipe.category}</span>
-                          </div>
-                          <div className="featured-large-content">
-                            <div>
-                              <h4 className="featured-large-title">{featuredRecipe.title}</h4>
-                              <p className="featured-large-desc">
-                                {featuredRecipe.shortDescription || 'Resep otentik pilihan hari ini.'}
-                              </p>
-                            </div>
-                            <RecipeActions
-                              recipe={featuredRecipe}
-                              isLiked={likedRecipeIds.includes(featuredRecipe.id)}
-                              isSaved={savedRecipeIds.includes(featuredRecipe.id)}
-                              onToggleLike={handleToggleLike}
-                              onToggleSave={handleToggleBookmark}
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Small Stack Cards (Right) */}
-                      <div className="featured-small-stack">
-                        {[highlight1, highlight2].map((recipe) => {
-                          if (!recipe) return null;
-                          return (
-                            <div key={recipe.id} className="featured-small-card animate-fade-in" onClick={() => handleRecipeClick(recipe)}>
-                              <div className="featured-small-img-container">
-                                <img
-                                  src={recipe.image || '/logo.ico'}
-                                  alt={recipe.title}
-                                  className="featured-small-img"
-                                  loading="lazy"
-                                />
-                              </div>
-                              <div className="featured-small-content">
-                                <div className="featured-small-top">
-                                  <span className="featured-small-category">{recipe.displayBadge || recipe.category}</span>
-                                  <h4 className="featured-small-title">{recipe.title}</h4>
-                                  {recipe.shortDescription && (
-                                    <p className="featured-small-desc">
-                                      {recipe.shortDescription}
-                                    </p>
-                                  )}
-                                </div>
-                                <RecipeActions
-                                  recipe={recipe}
-                                  isLiked={likedRecipeIds.includes(recipe.id)}
-                                  isSaved={savedRecipeIds.includes(recipe.id)}
-                                  onToggleLike={handleToggleLike}
-                                  onToggleSave={handleToggleBookmark}
-                                  compact={true}
-                                />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <FeaturedRecipeLayout
+                  recipes={recipes}
+                  likedRecipeIds={likedRecipeIds}
+                  savedRecipeIds={savedRecipeIds}
+                  onRecipeClick={handleRecipeClick}
+                  onToggleLike={handleToggleLike}
+                  onToggleSave={handleToggleBookmark}
+                />
 
                 {/* ─── Latest Recipes Section: Menu Harian Terbaru ─── */}
                 <h2 className="section-title" style={{ marginTop: '3rem', marginBottom: '1.5rem' }}>Menu Harian Terbaru</h2>

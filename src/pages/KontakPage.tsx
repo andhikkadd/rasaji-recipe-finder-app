@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageShell } from '../components/PageLayout';
+import '../components/InfoPageLayout.css';
 
 export function KontakPage() {
   const [name, setName] = useState('');
