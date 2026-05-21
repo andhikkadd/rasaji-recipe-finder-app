@@ -618,9 +618,9 @@ function HomeView() {
                 {/* ─── Latest Recipes Section: Menu Harian Terbaru ─── */}
                 <h2 className="section-title" style={{ marginTop: '3rem', marginBottom: '1.5rem' }}>Menu Harian Terbaru</h2>
 
-                {/* Chunk 1: First 8 recipes */}
+                {/* Chunk 1: First 9 recipes (rows 1–3 on a 3-col grid) */}
                 <div className="recipe-grid animate-fade-in">
-                  {mainRecipes.slice(0, 8).map((recipe, index) => (
+                  {mainRecipes.slice(0, 9).map((recipe, index) => (
                     <RecipeCard
                       key={recipe.id}
                       recipe={recipe}
@@ -758,11 +758,11 @@ function HomeView() {
                 )}
 
                 {/* ─── Latest Recipes Section: Rest of recipes (Chunk 2) ─── */}
-                {mainRecipes.length > 8 && (
+                {mainRecipes.length > 9 && (
                   <>
                     <h2 className="section-title" style={{ marginTop: '3.5rem', marginBottom: '1.5rem' }}>Rekomendasi Lainnya</h2>
                     <div className="recipe-grid animate-fade-in">
-                      {mainRecipes.slice(8).map((recipe, index) => (
+                      {mainRecipes.slice(9).map((recipe, index) => (
                         <RecipeCard
                           key={recipe.id}
                           recipe={recipe}

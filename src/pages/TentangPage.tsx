@@ -66,7 +66,7 @@ export function TentangPage() {
 
         {/* 3. High Focus Principles */}
         <section className="about-focus-section" style={{ marginTop: '3.5rem' }}>
-          <h2 className="about-section-heading">Fokus Utama Rasaji</h2>
+          <h2 className="about-section-heading" style={{ textAlign: 'center', marginBottom: 0 }}>Fokus Utama Rasaji</h2>
           
           <div className="about-focus-list">
             <div className="about-focus-item">

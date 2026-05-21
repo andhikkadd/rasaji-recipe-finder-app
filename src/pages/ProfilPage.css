@@ -156,8 +156,9 @@
 .stat-card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px 22px;
+  justify-content: center;
+  min-height: 150px;
+  padding: 24px;
   border-radius: 22px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: #fff;
@@ -168,13 +169,22 @@
   box-shadow: var(--shadow-sm);
 }
 
+.stat-card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+}
+
 .stat-icon-wrapper {
-  width: 44px;
-  height: 44px;
-  border-radius: 16px;
+  width: 52px;
+  height: 52px;
   display: grid;
   place-items: center;
-  flex-shrink: 0;
+  border-radius: 18px;
+  margin-bottom: 4px;
 }
 
 .stat-icon-wrapper.liked {
@@ -187,23 +197,18 @@
   color: #10b981;
 }
 
-.stat-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.stat-value {
+.stat-number {
   font-size: 1.35rem;
   font-weight: 800;
-  color: var(--text-primary);
   line-height: 1;
+  color: #0F172A;
 }
 
 .stat-label {
-  font-size: 0.92rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.2;
   color: #64748B;
-  font-weight: 500;
 }
 
 @media (max-width: 640px) {

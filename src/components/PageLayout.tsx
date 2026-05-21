@@ -45,11 +45,12 @@ interface PageHeaderProps {
   subtitle?: string;
 }
 
-export function PageHeader({ title, subtitle }: PageHeaderProps) {
+export function PageHeader({ title, subtitle, meta }: PageHeaderProps & { meta?: React.ReactNode }) {
   return (
-    <header className="page-header">
+    <header className="page-header" style={{ marginBottom: meta ? '24px' : '32px' }}>
       <h1>{title}</h1>
       {subtitle && <p>{subtitle}</p>}
+      {meta && <div className="page-meta" style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 500 }}>{meta}</div>}
     </header>
   );
 }
@@ -59,16 +60,17 @@ interface PageShellProps {
   breadcrumbItems: BreadcrumbItem[];
   title: string;
   subtitle?: string;
+  meta?: React.ReactNode;
 }
 
-export function PageShell({ children, breadcrumbItems, title, subtitle }: PageShellProps) {
+export function PageShell({ children, breadcrumbItems, title, subtitle, meta }: PageShellProps) {
   const label = breadcrumbItems[breadcrumbItems.length - 1]?.label || title;
   
   return (
     <div className="page-layout-wrapper">
       <Navbar breadcrumbLabel={label} />
       <main className="page-shell animate-fade-in">
-        <PageHeader title={title} subtitle={subtitle} />
+        <PageHeader title={title} subtitle={subtitle} meta={meta} />
         <div className="page-shell-content">
           {children}
         </div>
