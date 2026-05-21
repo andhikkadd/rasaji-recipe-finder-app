@@ -1,8 +1,8 @@
 /* ==================================================
    MOBILE RESPONSIVE LAYOUT FIXES
    ================================================== */
-
 @media (max-width: 640px) {
+
   /* 1. GLOBAL MOBILE SPACING */
   .page-shell,
   .home-container,
@@ -31,34 +31,34 @@
   }
 
   /* 2. MOBILE HERO SECTION */
-  .hero {
+  .hero-section {
     padding-top: 34px !important;
     padding-bottom: 24px !important;
   }
 
-  .hero h1 {
+  .hero-title {
     font-size: 1.35rem !important;
     line-height: 1.25 !important;
     margin-bottom: 8px !important;
   }
 
-  .hero p {
+  .hero-subtitle {
     font-size: 0.82rem !important;
     line-height: 1.5 !important;
     max-width: 280px !important;
     margin-inline: auto !important;
   }
 
-  .search-bar {
+  .search-form {
     height: 46px !important;
     margin-top: 18px !important;
   }
 
-  .search-bar input {
+  .search-input {
     font-size: 0.84rem !important;
   }
 
-  .search-button {
+  .search-btn {
     width: 38px !important;
     height: 38px !important;
   }
@@ -94,21 +94,20 @@
     overflow: hidden !important;
   }
 
-  .recipe-card-image {
-    height: 112px !important;
-    object-fit: cover !important;
+  .recipe-image-container {
+    padding-top: 65% !important;
   }
 
-  .recipe-card-content {
+  .recipe-content {
     padding: 11px 12px 10px !important;
   }
 
-  .recipe-card-badge {
+  .recipe-category-badge {
     font-size: 0.62rem !important;
     padding: 5px 8px !important;
   }
 
-  .recipe-card-title {
+  .recipe-title {
     font-size: 0.82rem !important;
     line-height: 1.28 !important;
     display: -webkit-box !important;
@@ -117,7 +116,7 @@
     overflow: hidden !important;
   }
 
-  .recipe-card-description {
+  .recipe-desc {
     font-size: 0.72rem !important;
     line-height: 1.45 !important;
     display: -webkit-box !important;
@@ -126,14 +125,9 @@
     overflow: hidden !important;
   }
 
-  .recipe-card-actions {
-    margin-top: 10px !important;
-    padding-top: 9px !important;
-  }
-
-  .recipe-card-actions svg {
-    width: 15px !important;
-    height: 15px !important;
+  .recipe-actions-minimal {
+    margin-top: 8px !important;
+    padding-top: 8px !important;
   }
 
   /* 5. FEATURED SECTION MOBILE */
@@ -143,91 +137,100 @@
   }
 
   .featured-layout {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
     gap: 12px !important;
+    height: auto !important;
   }
 
-  .featured-main-card img {
-    height: 170px !important;
+  .featured-large-img-container {
+    padding-top: 50% !important;
   }
 
-  .featured-main-card .content {
+  .featured-large-content {
     padding: 14px !important;
   }
 
-  .featured-main-card h3 {
+  .featured-large-title {
     font-size: 1rem !important;
     line-height: 1.3 !important;
   }
 
-  .featured-main-card p {
+  .featured-large-desc {
     font-size: 0.78rem !important;
     line-height: 1.5 !important;
     -webkit-line-clamp: 2 !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
   }
 
-  .featured-side-list {
+  .featured-small-stack {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 12px !important;
   }
 
-  .featured-side-card {
-    display: block !important;
+  .featured-small-card {
+    display: flex !important;
+    flex-direction: column !important;
   }
 
-  .featured-side-card img {
+  .featured-small-img-container {
     width: 100% !important;
-    height: 105px !important;
-    object-fit: cover !important;
+    padding-top: 65% !important;
+    min-width: unset !important;
+    height: auto !important;
   }
 
-  .featured-side-card .content {
+  .featured-small-img {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+  }
+
+  .featured-small-content {
     padding: 11px 12px !important;
   }
 
   /* 6. EDITORIAL BREAK SECTION */
-  .editorial-break, .editorial-strip {
+  .editorial-break-banner,
+  .editorial-strip {
     margin: 24px 0 !important;
     padding: 18px 16px !important;
     border-radius: 18px !important;
   }
 
-  .editorial-break h3, .editorial-strip-content h5 {
+  .editorial-break-title,
+  .editorial-strip-content h5 {
     font-size: 0.98rem !important;
     line-height: 1.3 !important;
   }
 
-  .editorial-break p, .editorial-strip-content p {
+  .editorial-break-desc,
+  .editorial-strip-content p {
     font-size: 0.78rem !important;
     line-height: 1.5 !important;
   }
 
-  .editorial-break-icon, .editorial-strip-icon {
-    width: 34px !important;
-    height: 34px !important;
-    font-size: 1.5rem !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-
   /* 7. POPULAR SECTION MOBILE */
-  .popular-header, .popular-section-header {
+  .popular-header,
+  .popular-section-header {
     align-items: center !important;
     margin-bottom: 14px !important;
   }
 
-  .popular-header h2, .popular-section-header h3 {
+  .popular-header h2,
+  .popular-section-header h3 {
     font-size: 1.1rem !important;
   }
 
-  .popular-header p, .popular-section-header p {
+  .popular-header p,
+  .popular-section-header p {
     font-size: 0.78rem !important;
   }
 
-  .see-all-button, .view-all-pill-btn {
+  .view-all-pill-btn {
     height: 34px !important;
     padding: 0 12px !important;
     font-size: 0.76rem !important;
@@ -260,21 +263,25 @@
   }
 
   /* 9. NAVBAR MOBILE */
-  .navbar {
+  .navbar,
+  .app-header {
     width: calc(100% - 28px) !important;
     padding: 10px 12px !important;
     border-radius: 20px !important;
+    margin-inline: auto !important;
   }
 
-  .brand-logo {
+  .brand-logo-mark {
     width: 30px !important;
     height: 30px !important;
   }
 
+  .logo-text,
   .brand-wordmark {
     font-size: 1rem !important;
   }
 
+  .auth-nav-btn,
   .navbar-auth button {
     height: 32px !important;
     padding: 0 12px !important;
@@ -289,7 +296,6 @@
   }
 }
 
-/* Fallback for very small screens */
 @media (max-width: 360px) {
   .recipe-grid {
     grid-template-columns: 1fr !important;

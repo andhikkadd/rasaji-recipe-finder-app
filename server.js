@@ -46,7 +46,7 @@ app.get('/api/health', (req, res) => {
 
 const distPath = path.join(__dirname, 'dist');
 
-app.use(express.json());
+app.use(express.json({ limit: '5mb' }));
 app.use(express.static(distPath));
 
 // ─── Session middleware ───────────────────────────────────

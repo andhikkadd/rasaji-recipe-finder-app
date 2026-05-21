@@ -61,7 +61,6 @@ export function PengaturanAkunPage() {
     const reader = new FileReader();
     reader.onloadend = () => {
       setAvatar(reader.result as string);
-      showToast("Upload foto permanen belum tersedia.", "info");
     };
     reader.readAsDataURL(file);
   };
@@ -92,9 +91,7 @@ export function PengaturanAkunPage() {
       return;
     }
 
-    // Do not save local data-URL/base64 previews to the DB
-    const isLocalDataUrl = avatar && avatar.startsWith('data:');
-    const finalAvatarUrl = isLocalDataUrl ? user.avatarUrl : avatar;
+    const finalAvatarUrl = avatar;
 
     try {
       const res = await fetch('/api/auth/profile', {
